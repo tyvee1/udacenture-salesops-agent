@@ -175,40 +175,41 @@ class ResolvedKey:
         return f"…{self.value[-4:]}" if len(self.value) >= 8 else "…(short)"
 
 
-def resolve_api_key(settings: Settings) -> ResolvedKey:
-    """Find the model key for the configured provider, refusing on any ambiguity.
+def resolve_secret(root: Path, var: str, hint: str) -> ResolvedKey:
+    """Find a secret in ``.env`` or the shell, refusing on any ambiguity.
 
     * Only in ``.env``           -> use it.
     * Only in the shell          -> use it.
     * In both, same value        -> use it (reported as ``.env``).
     * In both, different values  -> raise :class:`ConfigError`. Guessing which one
       the user meant is exactly the accident this check exists to prevent.
-    * In neither                 -> raise with the copy-``.env.example`` instruction.
+    * Still the ``.env.example`` placeholder, or in neither -> raise with ``hint``.
     """
-    var = settings.model.api_key_env
-    env_file = settings.root / ".env"
+    env_file = root / ".env"
     from_file = (dotenv_values(env_file).get(var) or "").strip() if env_file.is_file() else ""
     from_shell = (os.environ.get(var) or "").strip()
 
     for label, value in ((".env", from_file), ("shell environment", from_shell)):
         if "replace-me" in value:
-            raise ConfigError(
-                f"{var} in the {label} is still the .env.example placeholder. "
-                f"Paste the course-provided key into .env."
-            )
+            raise ConfigError(f"{var} in the {label} is still the .env.example placeholder. {hint}")
     if from_file and from_shell and from_file != from_shell:
         raise ConfigError(
             f"{var} is set in both .env and the shell environment with DIFFERENT values. "
-            f"Refusing to guess which key to use. Run `unset {var}` to use .env, "
+            f"Refusing to guess which to use. Run `unset {var}` to use .env, "
             f"or remove it from .env to use the shell value."
         )
     if from_file:
         return ResolvedKey(var, ".env", from_file)
     if from_shell:
         return ResolvedKey(var, "shell environment", from_shell)
-    raise ConfigError(
-        f"{var} is not set. Copy .env.example to .env and paste the course-provided key "
-        f"(provider '{settings.model.provider}')."
+    raise ConfigError(f"{var} is not set. {hint}")
+
+
+def resolve_api_key(settings: Settings) -> ResolvedKey:
+    """Resolve the model key for the configured provider (see :func:`resolve_secret`)."""
+    return resolve_secret(
+        settings.root, settings.model.api_key_env,
+        f"Copy .env.example to .env and paste the course-provided key (provider '{settings.model.provider}').",
     )
 
 
