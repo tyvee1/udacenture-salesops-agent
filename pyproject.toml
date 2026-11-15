@@ -19,6 +19,7 @@ observability = ["langfuse>=3.0"]
 
 [project.scripts]
 salesops-agent = "salesops_agent.cli:main"
+evaluate = "salesops_agent.evaluation.runner:main"
 
 [dependency-groups]
 dev = ["pytest>=8.0"]
