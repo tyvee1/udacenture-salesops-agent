@@ -1,0 +1,44 @@
+# Agent configuration — versioned alongside the prompt it selects.
+#
+# Every run records the SHA-256 of this file, the prompt file, the tool registry,
+# the guardrail policy and uv.lock, so a change in behaviour between two runs can
+# be traced to the file that changed.
+
+config_version: 1
+
+agent:
+  name: salesops-agent
+  # Which prompt file to load: prompts/<id>/v<version>.md
+  prompt:
+    id: salesops_system
+    version: 1
+  # Upper bound on model/tool steps in one run; stops runaway tool loops.
+  recursion_limit: 25
+
+model:
+  # "vocareum" = the course-supplied OpenAI-compatible proxy (default for this course).
+  # "openai"   = call OpenAI directly with OPENAI_API_KEY.
+  provider: vocareum
+  name: gpt-4o-mini
+  temperature: 0.0
+  timeout_seconds: 60
+  max_retries: 2
+
+providers:
+  vocareum:
+    base_url: https://openai.vocareum.com/v1
+    api_key_env: VOCAREUM_API_KEY
+  openai:
+    base_url: null
+    api_key_env: OPENAI_API_KEY
+
+# Estimated cost per 1M tokens, in USD. List prices for OpenAI's API, checked 2026-11-15.
+# The course proxy may bill differently; these figures are estimates, labelled as such in every report.
+pricing:
+  gpt-4o-mini:
+    input_per_million: 0.15
+    output_per_million: 0.60
+
+paths:
+  data_dir: data
+  tool_registry: config/tools.yaml
