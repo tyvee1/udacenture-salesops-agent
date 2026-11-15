@@ -1,0 +1,45 @@
+# Runs the test suite and the evaluation suite on every push and pull request.
+#
+# CI has no model key, so the evaluation runs in offline mode: live tasks use their
+# scripts and control tasks use their scripted adversarial model. A failing task fails
+# the job. The evaluation and monitoring reports are written to the job summary.
+
+name: evaluate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          enable-cache: true
+
+      - name: Install the locked environment
+        run: uv sync --frozen --all-extras
+
+      - name: Run the test suite
+        run: uv run pytest
+
+      - name: Run the evaluation suite (offline)
+        run: uv run evaluate --mode offline
+
+      - name: Generate the monitoring report
+        run: uv run generate-monitoring-report
+
+      - name: Publish reports to the job summary
+        if: always()
+        run: |
+          if [ -f reports/evaluation_report.md ]; then cat reports/evaluation_report.md >> "$GITHUB_STEP_SUMMARY"; fi
+          if [ -f reports/monitoring_report.md ]; then cat reports/monitoring_report.md >> "$GITHUB_STEP_SUMMARY"; fi

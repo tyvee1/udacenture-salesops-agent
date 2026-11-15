@@ -1,0 +1,20 @@
+# Secrets never enter the build context.
+.env
+.env.*
+!.env.example
+
+# Local environment, history and runtime output.
+.venv/
+.git/
+state/
+logs/
+traces/
+reports/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Not needed at runtime.
+notebooks/
+tests/
+.github/
