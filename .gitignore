@@ -1,0 +1,20 @@
+# Secrets: the course-supplied model key lives here and never leaves the machine.
+.env
+.env.*
+!.env.example
+
+# Python and uv
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Local editor and OS noise
+.DS_Store
+.idea/
+.vscode/
+.ipynb_checkpoints/
