@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run_log.schema.json",
+  "title": "SalesOps agent run log entry (one line of logs/runs.jsonl)",
+  "type": "object",
+  "required": [
+    "run_id",
+    "timestamp",
+    "user_input",
+    "task_id",
+    "final_status",
+    "tools_called",
+    "latency_ms",
+    "estimated_cost_usd",
+    "guardrail_interventions",
+    "hitl_decision",
+    "failure_reason",
+    "versions",
+    "trace_file"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{12}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "user_input": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "session_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "thread_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "final_status": {
+      "enum": [
+        "completed",
+        "blocked",
+        "rejected",
+        "error"
+      ]
+    },
+    "tools_called": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tool",
+          "status"
+        ],
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "executed",
+              "blocked",
+              "rejected"
+            ]
+          }
+        }
+      }
+    },
+    "tool_call_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "latency_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "input_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "output_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "estimated_cost_usd": {
+      "type": "number",
+      "minimum": 0
+    },
+    "usage_is_estimate": {
+      "type": "boolean"
+    },
+    "guardrail_interventions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "layer",
+          "reason",
+          "policy"
+        ]
+      }
+    },
+    "hitl_decision": {
+      "enum": [
+        "approve",
+        "reject",
+        null
+      ]
+    },
+    "hitl_approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tool",
+          "decision",
+          "source"
+        ]
+      }
+    },
+    "failure_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "required": [
+        "prompt_version",
+        "prompt_sha256",
+        "agent_config_sha256",
+        "tool_registry_sha256",
+        "policy_sha256",
+        "uv_lock_sha256"
+      ]
+    },
+    "trace_file": {
+      "type": "string"
+    }
+  }
+}

@@ -10,13 +10,11 @@ matters to the customer.
 from __future__ import annotations
 
 import json
-import shutil
 from pathlib import Path
 
 import pytest
 
 from salesops_agent.approval import ApprovalRequired, grant_scope
-from salesops_agent.config import load_settings
 from salesops_agent.scripted_model import ScriptedChatModel, answer, tool_call
 from salesops_agent.service import ask
 from salesops_agent.tools import build_context, load_registry
@@ -29,12 +27,9 @@ EMAIL = {"to": "omar.stone@acmecorp.example.com", "subject": "Following up on Ac
 
 
 @pytest.fixture
-def settings(tmp_path: Path):
-    """Project settings with state redirected to a temp dir, so each test has an empty outbox."""
-    for name in ("config", "prompts", "data", "evals"):
-        shutil.copytree(ROOT / name, tmp_path / name)
-    shutil.copy(ROOT / "uv.lock", tmp_path / "uv.lock")
-    return load_settings(tmp_path)
+def settings(project):
+    """Isolated project copy (see conftest), so each test starts with an empty outbox."""
+    return project
 
 
 def outbox_count(settings) -> int:

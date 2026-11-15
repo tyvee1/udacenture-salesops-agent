@@ -54,9 +54,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[approval] {a['tool']}: {a['decision']} (source: {a['source']})")
     if result.blocked:
         print(json.dumps(result.blocked))
+    print(f"[run {result.run_id}] status={result.status} trace={result.trace_path} log=logs/runs.jsonl",
+          file=sys.stderr)
     if result.status == "error":
         print(f"error: {result.failure_reason}", file=sys.stderr)
-        return 1
+        return 2 if (result.failure_reason or "").startswith("configuration error") else 1
     return 3 if result.status == "blocked" else 0
 
 

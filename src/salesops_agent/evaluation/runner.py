@@ -103,7 +103,7 @@ def run_task(task: EvalTask, settings: Settings, mode: str) -> TaskResult:
     outbox = EmailOutbox(settings.path("state_dir") / "email_outbox.jsonl")
     before = outbox.count()
 
-    kwargs: dict[str, Any] = {"settings": settings, "model": model}
+    kwargs: dict[str, Any] = {"settings": settings, "model": model, "task_id": task.id}
     if task.approval is not None:
         kwargs["approval"] = task.approval
 

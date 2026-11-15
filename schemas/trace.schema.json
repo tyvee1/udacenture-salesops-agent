@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "trace.schema.json",
+  "title": "SalesOps agent trace artifact (traces/<run_id>.json)",
+  "type": "object",
+  "required": [
+    "run_id",
+    "timestamp",
+    "input",
+    "versions",
+    "status",
+    "selected_tools",
+    "tool_calls",
+    "guardrail_decisions",
+    "hitl",
+    "final_output",
+    "errors",
+    "timeline"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "input": {
+      "type": "string"
+    },
+    "context": {
+      "type": "object"
+    },
+    "versions": {
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "blocked",
+        "rejected",
+        "error"
+      ]
+    },
+    "selected_tools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tool",
+          "args",
+          "status",
+          "output"
+        ]
+      }
+    },
+    "guardrail_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "layer",
+          "action",
+          "policy"
+        ]
+      }
+    },
+    "hitl": {
+      "type": "object",
+      "required": [
+        "approval_requested",
+        "decision",
+        "requests"
+      ]
+    },
+    "model_output": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "final_output": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "blocked": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failure_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "latency_ms": {
+      "type": "number"
+    },
+    "usage": {
+      "type": "object"
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "t_ms",
+          "kind"
+        ]
+      }
+    }
+  }
+}
