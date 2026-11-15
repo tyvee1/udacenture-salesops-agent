@@ -1,0 +1,32 @@
+[project]
+name = "salesops-agent"
+version = "0.1.0"
+description = "UdaCenture SalesOps agent, operationalized: versioned prompts and config, runtime guardrails, sandboxed analysis, human approval, structured logs, traces and monitoring."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=1.0",
+    "langchain-openai>=1.0",
+    "langgraph>=1.0",
+    "langgraph-checkpoint-sqlite>=2.0",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.40"]
+observability = ["langfuse>=3.0"]
+
+[project.scripts]
+salesops-agent = "salesops_agent.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
