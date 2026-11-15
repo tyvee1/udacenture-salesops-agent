@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 
 from salesops_agent.config import ConfigError
@@ -19,7 +20,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Parse arguments, run the command, print the answer. Returns the process exit code."""
+    """Parse arguments, run the command, print the answer. Returns the process exit code.
+
+    Exit codes: 0 answered, 3 blocked by a guardrail, 1 run error, 2 configuration error.
+    """
     args = build_parser().parse_args(argv)
     try:
         result = ask(args.question)
@@ -27,7 +31,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"configuration error: {exc}", file=sys.stderr)
         return 2
     print(result.answer)
-    return 0
+    if result.blocked:
+        print(json.dumps(result.blocked))
+    if result.status == "error":
+        print(f"error: {result.failure_reason}", file=sys.stderr)
+        return 1
+    return 3 if result.status == "blocked" else 0
 
 
 if __name__ == "__main__":  # pragma: no cover

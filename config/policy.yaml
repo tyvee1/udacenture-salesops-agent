@@ -1,0 +1,137 @@
+# Guardrail policy — salesops_data_access_policy
+#
+# Enforced in application code (src/salesops_agent/guardrails/), not by asking the
+# model to behave. Patterns are Python regular expressions matched against text that
+# has been Unicode-normalized, lower-cased and whitespace-collapsed.
+#
+# Order matters within each list: the first matching category supplies the reason.
+# `exempt` patterns are removed from the text before a category is tested, so an
+# ordinary SalesOps phrase ("customer acquisition cost", "terminate the contract")
+# cannot trigger a category it merely resembles.
+
+policy_name: salesops_data_access_policy
+policy_version: 1
+
+input:
+  categories:
+    - reason: prompt_injection
+      patterns:
+        - '\b(ignore|disregard|forget|override|bypass)\b.{0,40}\b(previous|prior|above|earlier|all|your|these|system|safety)\b.{0,30}\b(instructions?|rules|polic(y|ies)|prompts?|guidelines|guardrails|restrictions)\b'
+        - '\byou are (now|no longer)\b'
+        - '\b(act|behave|respond) as\b.{0,30}\b(admin(istrator)?|developer|root|unrestricted|unfiltered|jailbroken)\b'
+        - '\b(jailbreak|developer mode|dan mode|do anything now)\b'
+        - '\bpretend\b.{0,40}\b(rules|polic(y|ies)|restrictions|guardrails)\b.{0,30}\b(do not|don.?t|no longer)\b'
+        - '\bnew instructions?\s*:'
+    - reason: system_prompt_extraction
+      patterns:
+        - '\b(reveal|show|print|repeat|output|display|leak|tell me|give me|what (is|are))\b.{0,40}\b(system prompt|hidden (instructions?|prompt|rules)|your (instructions?|prompt|rules)|initial prompt|developer (message|prompt))\b'
+    - reason: executive_compensation
+      patterns:
+        - '\b(ceo|cfo|coo|cto|cro|cmo|executives?|exec|vps?|vice president|c-suite|leadership|founders?)\b.{0,40}\b(bonus(es)?|salar(y|ies)|compensation|comp|pay|paid|equity|stock|options|package|earn(s|ings)?)\b'
+        - '\b(bonus(es)?|salar(y|ies)|compensation|equity|pay)\b.{0,40}\b(ceo|cfo|coo|cto|cro|cmo|executives?|vps?|c-suite|leadership|founders?)\b'
+        - '\bexecutive (compensation|pay)\b'
+    - reason: restricted_hr_data
+      patterns:
+        - '\b(salar(y|ies)|bonus(es)?|compensation|pay band|pay grade|equity grant)\b'
+        - '\b(hr|human resources|personnel|employee) (data|records?|files?|information|details)\b'
+    - reason: employee_performance_or_termination
+      exempt:
+        - '\b(terminat\w*|cancel\w*|end\w*)\b.{0,30}\b(contract|agreement|subscription|licen[cs]e|deal|renewal|service)s?\b'
+        - '\b(contract|agreement|subscription|licen[cs]e|deal|renewal|service)s?\b.{0,30}\bterminat\w*\b'
+      patterns:
+        - '\b(fired|firing|get(ting)? fired|let go|sacked|dismiss(ed|al))\b'
+        - '\b(pip|performance improvement plan|performance (plan|review|rating|status|issues?|problems?))\b'
+        - '\bterminat\w*\b'
+        - '\bdisciplinary\b'
+    - reason: layoffs
+      patterns:
+        - '\blay ?offs?\b'
+        - '\blaid off\b'
+        - '\b(headcount|workforce|staff) (reduction|cuts?)\b'
+        - '\breduction in (force|headcount|workforce)\b'
+        - '\bdownsiz\w*\b'
+        - '\bjob cuts\b'
+    - reason: mergers_and_acquisitions
+      exempt:
+        - '\bcustomer acquisition\b'
+        - '\bacquisition (cost|channel|rate|funnel|strategy for (customers|leads))\b'
+        - '\b(lead|logo|user|new[- ]customer) acquisition\b'
+      patterns:
+        - '\b(acquir\w*|acquisitions?|mergers?|merging|m ?& ?a|m and a|buyouts?|buy out|takeovers?|take over|due diligence)\b'
+        - '\b(are we|is udacenture|we are|we.re)\b.{0,20}\b(buy(ing)?|purchas\w*)\b.{0,20}\b(company|corp|them|it|acme)\b'
+    - reason: confidential_strategy
+      patterns:
+        - 'confidential_[a-z_]+'
+        - '\bconfidential\b.{0,40}\b(strateg(y|ies)|plans?|fields?|data|financials?|information|details)\b'
+        - '\binternal financial (data|strateg(y|ies)|information|details)\b'
+        - '\b(discount polic(y|ies)|pricing strateg(y|ies)|max(imum)? (unapproved )?discount|override threshold|runway)\b'
+
+  # Shown to the user when an input is blocked.
+  refusal: >-
+    I can't help with that request. It asks for information outside SalesOps scope (restricted HR,
+    compensation, confidential strategy, or an attempt to change my instructions). I can help with
+    accounts, contacts, opportunities, pipeline, renewals, support issues, product usage and
+    customer follow-up emails.
+
+tools:
+  # Tools whose declared data_access is listed here are blocked for every SalesOps request.
+  denied_data_access:
+    restricted_hr: restricted_internal_data
+    restricted_financial: restricted_internal_data
+  # Field names from the restricted datasets. A CRM tool argument naming one is out of scope.
+  restricted_field_markers:
+    - salary_usd
+    - equity_bonus_usd
+    - performance_status
+    - confidential_strategy
+    - confidential_m_and_a
+    - confidential_layoff_plan
+    - confidential_discount_policy
+    - runway_months
+  # String arguments to CRM tools are also screened with the input categories above
+  # (except prompt_injection), so a CRM tool cannot be used to fetch restricted topics.
+  screen_arguments_with_input_categories: true
+
+output:
+  # Window (characters) within which a name/number and a sensitive term must co-occur.
+  proximity: 80
+  # anchor: a term only blocks when it falls within `proximity` of an anchor —
+  #   people_or_money  an employee named in the HR file, an executive title, or a money amount
+  #   people           an employee named in the HR file
+  #   (none)           the term blocks on its own
+  # strong: phrases that block on their own even when the category needs an anchor.
+  categories:
+    - reason: executive_compensation
+      anchor: people_or_money
+      terms: '\b(bonus(es)?|salar(y|ies)|compensation|equity|stock grant|pay package)\b'
+    - reason: employee_performance
+      anchor: people
+      strong: '\b(performance improvement plan|termination warning|pending termination)\b'
+      terms: '\b(pip|performance (improvement plan|status|rating|review)|exceeds expectations|meets expectations|below expectations|terminat\w*|fired|let go|disciplinary)\b'
+    - reason: mergers_and_acquisitions
+      exempt:
+        - '\bcustomer acquisition\b'
+        - '\bacquisition (cost|channel|rate|funnel)\b'
+        - '\b(lead|logo|user|new[- ]customer) acquisition\b'
+      terms: '\b(acquir\w*|acquisitions?|mergers?|takeovers?|buyouts?|active negotiation)\b'
+    - reason: layoffs
+      terms: '\b(lay ?offs?|laid off|(headcount|workforce|staff) (reduction|cuts?)|reduction in (force|headcount|workforce)|planned reduction|\d{1,2} ?% reduction|downsiz\w*)\b'
+    - reason: confidential_strategy
+      terms: '\b(confidential_[a-z_]+|max(imum)? unapproved discount|executive override threshold|internal pricing strategy|discount polic(y|ies)|runway)\b'
+  # Raw field names from restricted data are blocked wherever they appear.
+  raw_field_reason: raw_sensitive_fields
+  refusal: >-
+    The response was withheld because it contained restricted internal information (compensation,
+    performance, acquisition, layoff or confidential strategy details). The attempt has been logged.
+
+email:
+  # Applied to the subject and body of send_email before approval is requested,
+  # in addition to every output category above.
+  reason: unsafe_email_content
+  claims:
+    - name: invented_discount
+      pattern: '\b(\d{1,2} ?% ?(off|discount)|discount(s|ed)?|price (cut|reduction|lock|match)|free (month|months|upgrade|seats?)|waive[ds]?)\b'
+    - name: legal_commitment
+      pattern: '\b(guarantee[ds]?|legally binding|contractual(ly)? (commit\w*|obligat\w*)|we commit|indemnif\w*|warrant(y|ies)|liabilit(y|ies)|sla credits?)\b'
+    - name: confidential_acquisition
+      pattern: '\b(acquir\w*|acquisitions?|mergers?|takeovers?|buyouts?)\b'
