@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
 
 @dataclass
@@ -26,6 +26,9 @@ class RunRecorder:
     approvals: list[dict[str, Any]] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     _seen: set[tuple[str, ...]] = field(default_factory=set, repr=False)
+    #: Called as ``listener(kind, data)`` for every event — how optional external tracing
+    #: sees guardrail and approval decisions without the controls knowing it exists.
+    listeners: list[Callable[[str, dict[str, Any]], None]] = field(default_factory=list, repr=False)
 
     def _elapsed_ms(self) -> float:
         return round((time.perf_counter() - self.started) * 1000, 1)
@@ -33,6 +36,11 @@ class RunRecorder:
     def event(self, kind: str, **data: Any) -> None:
         """Append a timestamped event to the run's timeline."""
         self.events.append({"t_ms": self._elapsed_ms(), "kind": kind, **data})
+        for listener in self.listeners:
+            try:
+                listener(kind, data)
+            except Exception:  # an observer must never change the outcome of the run it observes
+                pass
 
     def _first_time(self, *key: str) -> bool:
         """True the first time ``key`` is seen in this run.

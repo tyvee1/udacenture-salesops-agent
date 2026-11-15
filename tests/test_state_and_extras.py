@@ -154,7 +154,7 @@ def test_langfuse_export_is_masked_end_to_end(project, monkeypatch) -> None:
 
     from salesops_agent.external_tracing import langfuse_session
 
-    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-lf-test")
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-lf-test-export")  # one SDK client per key per process
     monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-lf-test")
     monkeypatch.setenv("LANGFUSE_HOST", "http://127.0.0.1:9")
     exporter = InMemorySpanExporter()

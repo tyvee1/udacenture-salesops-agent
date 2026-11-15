@@ -17,6 +17,9 @@ prompt, tools, runtime controls, state and logging:
 4. **Output guardrail** — screens the final answer before it is returned.
 5. **Logging** — whatever happened, one line goes to ``logs/runs.jsonl``, one trace
    to ``traces/<run_id>.json`` (both redacted) and one row to the run history.
+
+Optional external tracing (``tracer``) wraps steps 1–5: one Langfuse trace per run,
+with every guardrail and approval decision on it. See :mod:`salesops_agent.external_tracing`.
 """
 
 from __future__ import annotations
@@ -32,6 +35,7 @@ from langgraph.types import Command
 from salesops_agent.agent import build_agent
 from salesops_agent.config import ConfigError, Settings, load_settings, make_chat_model
 from salesops_agent.costs import collect_usage, estimate_cost_usd
+from salesops_agent.external_tracing import NullTracer, RunInfo
 from salesops_agent.guardrails import (
     SensitiveIndex,
     ToolCheckContext,
@@ -91,12 +95,16 @@ class AgentRun:
     def __init__(self, question: str, settings: Settings, model: Any, approval: str | None,
                  approver: Approver | None, defer_approval: bool, task_id: str | None,
                  user_id: str | None, session_id: str | None, thread_id: str | None,
-                 callbacks: list[Any] | None = None):
+                 callbacks: list[Any] | None = None, tracer: Any = None, source: str = "cli"):
         self.question, self.settings, self.model = question, settings, model
         self.approval, self.approver, self.defer_approval = approval, approver, defer_approval
         self.callbacks = callbacks or []
+        self.tracer = tracer or NullTracer()
+        self.source = source
+        self.named_session = session_id  # sessions are only meaningful when the caller names one
         self.timestamp = utc_now()
         self.rec = RunRecorder(run_id=uuid.uuid4().hex[:12])
+        self.rec.listeners.append(self.tracer.on_event)
         self.identity = Identity.create(user_id, session_id, thread_id, self.rec.run_id)
         self.prompt = load_prompt(settings)
         self.policy = load_policy(settings.root / "config" / "policy.yaml")
@@ -155,8 +163,23 @@ class AgentRun:
 
     # ---------------------------------------------------------------- lifecycle
 
+    def _run_info(self) -> RunInfo:
+        return RunInfo(run_id=self.rec.run_id, question=self.question, user_id=self.identity.user_id,
+                       session_id=self.named_session, thread_key=self.identity.thread_key,
+                       prompt_version=self.prompt.version, model=self.context["model"],
+                       task_id=self.context["task_id"], source=self.source)
+
+    def _callbacks(self) -> list[Any]:
+        return self.callbacks + self.tracer.callbacks()
+
     def start(self) -> RunResult:
         """Run from the input guardrail until the run finishes or pauses for a deferred approval."""
+        with self.tracer.trace(self._run_info()):
+            result = self._start()
+            self.tracer.end(result)
+            return result
+
+    def _start(self) -> RunResult:
         rec, policy = self.rec, self.policy
         rec.event("run_started", input_chars=len(self.question), thread_key=self.identity.thread_key)
 
@@ -178,7 +201,7 @@ class AgentRun:
                                  middleware=[ToolGuardrailMiddleware(check_ctx, rec)],
                                  checkpointer=self.store.checkpointer)
         self.config = {"configurable": {"thread_id": self.identity.thread_key},
-                       "recursion_limit": self.settings.recursion_limit, "callbacks": self.callbacks}
+                       "recursion_limit": self.settings.recursion_limit, "callbacks": self._callbacks()}
         self.prior_messages = len(self.store.thread_messages(self.identity))
         rec.event("memory_loaded", prior_messages=self.prior_messages)
         return self._drive({"messages": [{"role": "user", "content": self.question}]})
@@ -192,7 +215,12 @@ class AgentRun:
         verdicts = {i.id: {"decision": decision, "source": "ui"} for i in self.pending}
         self.pending = []
         resume = next(iter(verdicts.values())) if len(verdicts) == 1 else verdicts
-        return self._drive(Command(resume=resume))
+        # A resume after a person decides is a second trace in the same session.
+        with self.tracer.trace(self._run_info()):
+            self.config["callbacks"] = self._callbacks()
+            result = self._drive(Command(resume=resume))
+            self.tracer.end(result)
+            return result
 
     def _drive(self, payload: Any) -> RunResult:
         """Invoke the agent, resolving approval pauses until it finishes or must wait for a person."""
@@ -255,19 +283,21 @@ def start_run(
     session_id: str | None = None,
     thread_id: str | None = None,
     callbacks: list[Any] | None = None,
+    tracer: Any = None,
+    source: str = "cli",
 ) -> tuple[AgentRun, RunResult]:
     """Start a run and return it with its first result (which may be ``awaiting_approval``)."""
     if approval is not None and approval not in ("approve", "reject"):
         raise ValueError("approval must be 'approve' or 'reject'")
     run = AgentRun(question, settings or load_settings(), model, approval, approver, defer_approval, task_id,
-                   user_id, session_id, thread_id, callbacks)
+                   user_id, session_id, thread_id, callbacks, tracer, source)
     return run, run.start()
 
 
 def ask(question: str, settings: Settings | None = None, model: Any = None, approval: str | None = None,
         approver: Approver | None = None, task_id: str | None = None, user_id: str | None = None,
         session_id: str | None = None, thread_id: str | None = None,
-        callbacks: list[Any] | None = None) -> RunResult:
+        callbacks: list[Any] | None = None, tracer: Any = None, source: str = "cli") -> RunResult:
     """Answer one SalesOps question under the runtime controls, and log it.
 
     Args:
@@ -278,10 +308,12 @@ def ask(question: str, settings: Settings | None = None, model: Any = None, appr
         approver: interactive callback used when ``approval`` is not given.
         task_id: evaluation task id, recorded in the log when the run comes from the suite.
         user_id, session_id, thread_id: conversation identity; omit all three for a one-off question.
-        callbacks: LangChain callback handlers (used for optional external tracing).
+        callbacks: extra LangChain callback handlers.
+        tracer: optional external tracer (see :mod:`salesops_agent.external_tracing`).
+        source: where the run came from (``cli``, ``eval``, ``ui``), recorded as a trace tag.
     """
     _run, result = start_run(question, settings, model, approval, approver, False, task_id,
-                             user_id, session_id, thread_id, callbacks)
+                             user_id, session_id, thread_id, callbacks, tracer, source)
     return result
 
 

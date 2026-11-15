@@ -1677,7 +1677,7 @@ dev = [
 requires-dist = [
     { name = "langchain", specifier = ">=1.0" },
     { name = "langchain-openai", specifier = ">=1.0" },
-    { name = "langfuse", marker = "extra == 'observability'", specifier = ">=3.0" },
+    { name = "langfuse", marker = "extra == 'observability'", specifier = ">=5.2,<6" },
     { name = "langgraph", specifier = ">=1.0" },
     { name = "langgraph-checkpoint-sqlite", specifier = ">=2.0" },
     { name = "python-dotenv", specifier = ">=1.0" },

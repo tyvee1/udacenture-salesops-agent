@@ -15,7 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 ui = ["streamlit>=1.40"]
-observability = ["langfuse>=3.0"]
+observability = ["langfuse>=5.2,<6"]
 
 [project.scripts]
 salesops-agent = "salesops_agent.cli:main"

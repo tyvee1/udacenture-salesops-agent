@@ -503,10 +503,41 @@ uv run salesops-agent ask "Summarize the account risk for TechStart Inc." --lang
 ```
 
 Set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` and `LANGFUSE_HOST` in `.env` (self-hosted Langfuse at
-`http://localhost:3000`, or Langfuse Cloud). Everything sent passes through the same redactor as the
-local traces. The mask first converts LangChain message objects and tuples to plain data — a mask
-that only handles strings and dicts lets those through — and fails closed. A test captures the
-exported spans for a leaking run and checks the leak is absent.
+`http://localhost:3000`, or Langfuse Cloud). Traces are labelled `development` unless
+`LANGFUSE_TRACING_ENVIRONMENT` says otherwise.
+
+*What a trace contains.* One run is one trace named `salesops-ask`, even when the run pauses for an
+email approval and the agent is invoked twice:
+
+```text
+answer-salesops-question   [agent]      input: the user message; output: the answer the user saw
+├── check-input            [guardrail]  allowed or blocked, with reason and policy
+├── LangGraph              [chain]      the agent loop, from the LangChain integration
+│   ├── ChatOpenAI         [generation] model name, token usage, the messages the model saw
+│   └── <tool>             [tool]       arguments and result
+├── check-tool-call        [guardrail]  one per screened tool call
+├── require-human-approval [guardrail]  the paused send_email and the decision
+└── check-output           [guardrail]
+```
+
+A request the input guardrail blocks still produces a trace (root and `check-input`, both marked
+`WARNING`), so refusals are visible next to answers. Each trace carries the user id, the prompt version
+as its `version` (`prompt-v<N>`), tags, and metadata linking it to the local `run_id` and
+`traces/<run_id>.json`. A session id is set only when `--session-id` is given, since a one-off question
+has no conversation to group. Every approval decision is also a `human-approval` boolean score (1
+approved, 0 rejected), so approval rates can be charted.
+
+*Masking.* Everything sent passes through the same redactor as the local traces. The mask first
+converts LangChain message objects and tuples to plain data — a mask that only handles strings and
+dicts lets those through — and fails closed. The one exemption is the exact text of the active system
+prompt: it says "never state … acquisition plans", so the topic rules would blank it in every
+generation and hide the instructions the model followed. Any other string, including the prompt with
+anything appended, is redacted as usual.
+
+*Failures.* Masking fails closed; tracing fails open. If Langfuse is unreachable or the SDK raises, the
+run's outcome is unchanged and one warning goes to stderr. `tests/test_external_tracing.py` captures
+the exported spans offline and checks each property above; each check fails when its property is
+removed.
 
 ![Langfuse trace of a SalesOps run](docs/images/langfuse-trace.png)
 

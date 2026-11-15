@@ -92,7 +92,7 @@ def cmd_ask(args: argparse.Namespace) -> int:
     approver = prompt_for_approval if args.approval is None and sys.stdin.isatty() else None
     result = ask(args.question, approval=args.approval, approver=approver, user_id=args.user_id,
                  session_id=args.session_id, thread_id=args.thread_id,
-                 callbacks=session.callbacks if session else None)
+                 tracer=session.tracer if session else None)
     if session:
         session.flush()
         print("[langfuse] run sent (redacted) — open your Langfuse project to view the trace", file=sys.stderr)
