@@ -503,7 +503,8 @@ uv run salesops-agent ask "Summarize the account risk for TechStart Inc." --lang
 ```
 
 Set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` and `LANGFUSE_HOST` in `.env` (self-hosted Langfuse at
-`http://localhost:3000`, or Langfuse Cloud). Traces are labelled `development` unless
+`http://localhost:3000`, or Langfuse Cloud). `LANGFUSE_BASE_URL`, the name Langfuse's own setup snippet
+uses, is accepted in place of `LANGFUSE_HOST`; if both are set to different addresses the run refuses. Traces are labelled `development` unless
 `LANGFUSE_TRACING_ENVIRONMENT` says otherwise.
 
 *What a trace contains.* One run is one trace named `salesops-ask`, even when the run pauses for an

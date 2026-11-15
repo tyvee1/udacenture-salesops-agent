@@ -199,3 +199,50 @@ def test_a_tracing_failure_does_not_change_the_run(project, traced, monkeypatch)
     assert traced_result.status == untraced.status == "completed"
     assert traced_result.tools_executed == untraced.tools_executed
     assert traced_result.answer == untraced.answer
+
+
+# ------------------------------------------------------------------ server address
+
+
+@pytest.mark.parametrize("dotenv, expected", [
+    ("LANGFUSE_HOST=https://cloud.langfuse.com\n", "https://cloud.langfuse.com"),
+    ("LANGFUSE_BASE_URL=https://us.cloud.langfuse.com\n", "https://us.cloud.langfuse.com"),
+    ("LANGFUSE_HOST=https://cloud.langfuse.com\nLANGFUSE_BASE_URL=https://cloud.langfuse.com/\n",
+     "https://cloud.langfuse.com"),
+])
+def test_either_host_name_is_accepted(project, monkeypatch, dotenv, expected) -> None:
+    """Langfuse's own snippet says LANGFUSE_BASE_URL; .env.example says LANGFUSE_HOST."""
+    from salesops_agent.external_tracing import resolve_langfuse_host
+
+    for name in ("LANGFUSE_HOST", "LANGFUSE_BASE_URL"):
+        monkeypatch.delenv(name, raising=False)
+    (project.root / ".env").write_text(dotenv)
+    assert resolve_langfuse_host(project.root) == expected
+
+
+def test_two_different_hosts_are_refused(project, monkeypatch) -> None:
+    from salesops_agent.config import ConfigError
+    from salesops_agent.external_tracing import resolve_langfuse_host
+
+    for name in ("LANGFUSE_HOST", "LANGFUSE_BASE_URL"):
+        monkeypatch.delenv(name, raising=False)
+    (project.root / ".env").write_text("LANGFUSE_HOST=https://cloud.langfuse.com\n"
+                                       "LANGFUSE_BASE_URL=https://us.cloud.langfuse.com\n")
+    with pytest.raises(ConfigError, match="different addresses"):
+        resolve_langfuse_host(project.root)
+
+
+def test_a_missing_host_names_the_lines_it_saw_without_values(project, monkeypatch) -> None:
+    """The case from a real run: the host line was still commented out."""
+    from salesops_agent.config import ConfigError
+    from salesops_agent.external_tracing import resolve_langfuse_host
+
+    for name in ("LANGFUSE_HOST", "LANGFUSE_BASE_URL"):
+        monkeypatch.delenv(name, raising=False)
+    (project.root / ".env").write_text("LANGFUSE_PUBLIC_KEY=pk-lf-abc123\nLANGFUSE_SECRET_KEY=sk-lf-secret999\n"
+                                       "# LANGFUSE_HOST=https://cloud.langfuse.com\n")
+    with pytest.raises(ConfigError) as caught:
+        resolve_langfuse_host(project.root)
+    message = str(caught.value)
+    assert "LANGFUSE_HOST (commented out)" in message and "LANGFUSE_PUBLIC_KEY" in message
+    assert "secret999" not in message and "abc123" not in message, "values must never be printed"

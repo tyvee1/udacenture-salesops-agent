@@ -48,12 +48,60 @@ import contextlib
 import os
 import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable, Iterator
 
 from salesops_agent.config import ConfigError, Settings, resolve_secret
 from salesops_agent.redaction import Redactor
 
 HINT = "Add LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY and LANGFUSE_HOST to .env (see .env.example)."
+
+#: Langfuse's current setup snippet names the server LANGFUSE_BASE_URL; older docs and
+#: this project's .env.example say LANGFUSE_HOST. Either is accepted.
+HOST_NAMES = ("LANGFUSE_HOST", "LANGFUSE_BASE_URL")
+
+
+def langfuse_lines_in_dotenv(root: Path) -> list[str]:
+    """Names (never values) of the Langfuse lines in ``.env``, marking commented-out ones."""
+    env_file = root / ".env"
+    if not env_file.is_file():
+        return []
+    found = []
+    for line in env_file.read_text().splitlines():
+        text = line.strip()
+        commented = text.startswith("#")
+        name = text.lstrip("#").strip().split("=", 1)[0].strip()
+        if name.startswith("LANGFUSE_") and "=" in text:
+            found.append(f"{name} (commented out)" if commented else name)
+    return found
+
+
+def resolve_langfuse_host(root: Path) -> str:
+    """The Langfuse server address from LANGFUSE_HOST or LANGFUSE_BASE_URL.
+
+    Each name is resolved with the same rules as the keys (``.env`` or shell, refusing
+    when the two disagree). If both names are set to different addresses, refuse rather
+    than guess. If neither is set, say which Langfuse lines ``.env`` does contain, so a
+    commented-out line or a misspelled name is visible without printing any value.
+    """
+    values = {}
+    for name in HOST_NAMES:
+        try:
+            values[name] = resolve_secret(root, name, HINT).value
+        except ConfigError as exc:
+            if "is not set" not in str(exc):
+                raise  # placeholder value or .env/shell conflict: report it as is
+    distinct = {v.rstrip("/") for v in values.values()}
+    if len(distinct) > 1:
+        raise ConfigError("LANGFUSE_HOST and LANGFUSE_BASE_URL are both set, to different addresses. "
+                          "Refusing to guess which Langfuse server to send traces to; keep one of them.")
+    if values:
+        return next(iter(values.values()))
+    seen = langfuse_lines_in_dotenv(root)
+    found = f" .env has: {', '.join(seen)}." if seen else " .env has no Langfuse lines."
+    raise ConfigError(f"Neither LANGFUSE_HOST nor LANGFUSE_BASE_URL is set.{found} "
+                      "Add an uncommented line such as LANGFUSE_HOST=https://cloud.langfuse.com "
+                      "(or https://us.cloud.langfuse.com for the US region).")
 
 
 def to_plain(value: Any) -> Any:
@@ -306,7 +354,7 @@ def langfuse_session(settings: Settings, **client_kwargs: Any) -> LangfuseSessio
 
     public = resolve_secret(settings.root, "LANGFUSE_PUBLIC_KEY", HINT).value
     secret = resolve_secret(settings.root, "LANGFUSE_SECRET_KEY", HINT).value
-    host = resolve_secret(settings.root, "LANGFUSE_HOST", HINT).value
+    host = resolve_langfuse_host(settings.root)
     from salesops_agent.prompts import load_prompt
 
     policy = load_policy(settings.root / "config" / "policy.yaml")
