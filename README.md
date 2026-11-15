@@ -237,7 +237,7 @@ every run's log line and trace (`versions`):
 
 | Component | File(s) | Version marker |
 | --- | --- | --- |
-| System prompt | `prompts/salesops_system/v1.md` … `v4.md` | front matter `version`, `status`, change notes; active version set in `config/agent.yaml` |
+| System prompt | `prompts/salesops_system/v1.md` … `v5.md` | front matter `version`, `status`, change notes; active version set in `config/agent.yaml` |
 | Agent and model configuration | `config/agent.yaml` | `config_version`; provider, model, temperature, timeout, retries, pricing |
 | Tool definitions | `config/tools.yaml` | `registry_version`; per-tool `version`, `risk`, `data_access` |
 | Tool argument schemas | `src/salesops_agent/schemas.py` | Pydantic models validated before any tool runs |
@@ -249,7 +249,8 @@ every run's log line and trace (`versions`):
 
 The prompt history is kept, not overwritten: v1 is the notebook prompt verbatim; v2 removes the
 invitation to use internal tools; v3 routes calculations to the sandbox; v4 states the email approval
-rule. Each run records `prompt_version`, `prompt_sha256`, `agent_config_sha256`,
+rule; v5 honours a request for a named tool, after a live evaluation run showed v4 answering "using the
+analysis tool" with a different tool. The active prompt is v5. Each run records `prompt_version`, `prompt_sha256`, `agent_config_sha256`,
 `tool_registry_sha256`, `policy_sha256`, `uv_lock_sha256`, the model and the git commit — so two runs
 that behaved differently can be compared field by field
 (`uv run salesops-agent replay <run_id>` does this; see [replay](#state-memory-isolation-and-replay)).
