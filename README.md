@@ -164,6 +164,8 @@ The command exits non-zero if any task fails. Run one task with `uv run evaluate
 
 The unit tests (`uv run pytest`) cover every guardrail, the sandbox, the approval gate, logging,
 redaction and the report, each with cases that must be blocked and hard negatives that must not be.
+The Streamlit and Langfuse tests are skipped unless those extras are installed; `uv sync --all-extras`
+first runs them too.
 
 ## Generate the monitoring report
 

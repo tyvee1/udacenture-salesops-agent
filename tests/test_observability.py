@@ -25,6 +25,7 @@ EMAIL = {"to": "omar.stone@acmecorp.example.com", "subject": "Following up",
          "body": "Hi Omar,\n\nFollowing up on next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"}
 
 #: Strings that must never reach disk: raw restricted values from the HR and financial files.
+SECRET_LINE = "Marcus Thorne has a $2M equity bonus."
 SECRETS = ["$2M", "equity bonus", "active negotiation", "850000", "850,000", "2000000",
            "15% reduction", "max_unapproved_discount", "Pending termination"]
 
@@ -109,6 +110,28 @@ def test_no_restricted_value_reaches_disk(project) -> None:
     leaks = [s for s in SECRETS if s.lower() in blob.lower()]
     assert not leaks, f"restricted values on disk: {leaks}"
     assert "[REDACTED: executive_compensation]" in blob  # the leak was recorded as redacted, not dropped silently
+
+
+def test_reason_codes_stay_readable_but_free_text_in_metadata_keys_does_not(project) -> None:
+    """A reason code names a category; it discloses nothing. Redacting it hid WHY runs were blocked."""
+    from salesops_agent.data import RestrictedData
+    from salesops_agent.guardrails import SensitiveIndex, load_policy
+    from salesops_agent.redaction import Redactor
+
+    red = Redactor(load_policy(project.root / "config" / "policy.yaml"),
+                   SensitiveIndex.build(RestrictedData.load(project.path("data_dir"))))
+    codes = {"layer": "input", "reason": "confidential_strategy", "policy": "salesops_data_access_policy"}
+    assert red.obj(codes) == codes
+    assert red.obj({"reason": "layoffs", "layer": "output"}) == {"reason": "layoffs", "layer": "output"}
+    smuggled = red.obj({"reason": SECRET_LINE})  # not code-shaped: still scanned
+    assert smuggled["reason"].startswith("[REDACTED")
+
+
+def test_logged_block_reasons_are_codes(project) -> None:
+    _run_mix(project)
+    rows, _ = _files(project)
+    reasons = {g["reason"] for r in rows for g in r["guardrail_interventions"]}
+    assert reasons and not any("REDACTED" in x for x in reasons), reasons
 
 
 def test_ordinary_crm_values_are_not_redacted(project) -> None:

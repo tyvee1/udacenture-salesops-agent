@@ -33,6 +33,14 @@ from salesops_agent.guardrails.sensitive import SensitiveIndex
 
 REDACTED = "[REDACTED]"
 
+#: Structural fields whose values are codes chosen by this program (reason codes, layer names, policy
+#: names, statuses, ids), not data. They are left readable so logs and the monitoring report can say WHY
+#: something was blocked: a reason code like ``confidential_strategy`` names a category, it does not
+#: disclose one. Only values shaped like a code pass; free text in these keys is still scanned.
+METADATA_KEYS = frozenset({"reason", "layer", "policy", "action", "kind", "status", "tool", "call_id",
+                           "source", "decision", "task_id", "run_id", "type"})
+_CODE = re.compile(r"[a-z0-9_:.\-]{1,64}")
+
 
 class Redactor:
     """Applies the four redaction rules with one policy and sensitive index."""
@@ -58,9 +66,18 @@ class Redactor:
         return self._values.sub(REDACTED, value) if self._values else value
 
     def obj(self, value: Any) -> Any:
-        """Rules 2 and 3 applied recursively to dicts, lists and strings."""
+        """Rules 2 and 3 applied recursively to dicts, lists and strings (code-shaped metadata kept)."""
         if isinstance(value, dict):
-            return {k: (REDACTED if str(k).lower() in self._keys else self.obj(v)) for k, v in value.items()}
+            out = {}
+            for k, v in value.items():
+                key = str(k).lower()
+                if key in self._keys:
+                    out[k] = REDACTED
+                elif key in METADATA_KEYS and isinstance(v, str) and _CODE.fullmatch(v):
+                    out[k] = v
+                else:
+                    out[k] = self.obj(v)
+            return out
         if isinstance(value, list):
             return [self.obj(v) for v in value]
         if isinstance(value, str):
