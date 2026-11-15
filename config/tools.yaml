@@ -75,3 +75,15 @@ tools:
     data_access: restricted_financial
     risk: high
     description: Internal financial data and strategy. Restricted; retained from the prototype.
+
+  - name: analyze_crm_data
+    version: 1
+    implementation: analysis.analyze_crm_data
+    data_access: approved_crm
+    risk: medium
+    description: >-
+      Run a short Python analysis over the approved CRM datasets (accounts, opportunities, activities,
+      support_tickets, product_usage, contacts without email addresses), which are available as lists of
+      dicts. Assign the answer to a variable named `result`. No imports, no file or network access, no
+      function or class definitions; use plain loops, comprehensions and builtins such as sum, len,
+      sorted, min, max and round. Use this for counts, totals, averages, rankings and comparisons.

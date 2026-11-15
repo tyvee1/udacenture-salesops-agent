@@ -53,6 +53,15 @@ class SendEmailArgs(BaseModel):
     body: str = Field(..., min_length=1, max_length=5000, description="Plain-text body.")
 
 
+class AnalyzeArgs(BaseModel):
+    """Code for the sandboxed analysis tool."""
+
+    code: str = Field(
+        ..., min_length=1, max_length=4000,
+        description="Python statements over the approved datasets; assign the answer to `result`.",
+    )
+
+
 class InternalQueryArgs(BaseModel):
     """Free-text query for the retained internal-data tools."""
 
@@ -67,6 +76,7 @@ ARG_SCHEMAS: dict[str, type[BaseModel]] = {
     "crm.summarize_pipeline": NoArgs,
     "email.draft_email": DraftEmailArgs,
     "email.send_email": SendEmailArgs,
+    "analysis.analyze_crm_data": AnalyzeArgs,
     "internal.lookup_internal_hr_data": InternalQueryArgs,
     "internal.lookup_internal_financial_data": InternalQueryArgs,
 }

@@ -15,6 +15,7 @@ from typing import Any
 
 from salesops_agent.guardrails.policy import Policy, normalize
 from salesops_agent.guardrails.sensitive import EXEC_TITLES, MONEY, SensitiveIndex
+from salesops_agent.sandbox import SandboxViolation, validate_code
 
 
 @dataclass
@@ -172,6 +173,7 @@ class ToolCheckContext:
     index: SensitiveIndex
     specs: dict[str, Any]
     known_recipients: set[str] = field(default_factory=set)
+    sandbox: Any = None  # SandboxConfig; validates analyze_crm_data code before it runs
 
 
 def _string_args(args: dict[str, Any]) -> list[str]:
@@ -185,9 +187,10 @@ def check_tool_call(name: str, args: dict[str, Any], ctx: ToolCheckContext) -> D
 
     1. the tool is in the registry;
     2. its declared data access is not denied (restricted HR / financial);
-    3. no argument names a restricted field;
-    4. no string argument asks for a restricted topic (input categories reused);
-    5. for ``send_email``: the recipient is a CRM contact and the content is safe.
+    3. for ``analyze_crm_data``: the code passes the sandbox's static validation;
+    4. no argument names a restricted field;
+    5. no string argument asks for a restricted topic (input categories reused);
+    6. for ``send_email``: the recipient is a CRM contact and the content is safe.
 
     Approval for high-risk tools is a separate step applied after these checks
     pass, so a human is never asked to approve something policy already forbids.
@@ -202,13 +205,22 @@ def check_tool_call(name: str, args: dict[str, Any], ctx: ToolCheckContext) -> D
         return Decision("tool", "blocked", policy.name, reason=denied, tool=name,
                         detail=f"data_access={spec.data_access} is not permitted for SalesOps requests")
 
+    if name == "analyze_crm_data":
+        if ctx.sandbox is None:
+            return Decision("tool", "blocked", policy.name, reason="sandbox_violation", tool=name,
+                            detail="sandbox is not configured")
+        try:
+            validate_code(str(args.get("code", "")), ctx.sandbox)
+        except SandboxViolation as exc:
+            return Decision("tool", "blocked", policy.name, reason="sandbox_violation", tool=name, detail=str(exc))
+
     flat = normalize(json.dumps(args, default=str))
     for marker in policy.restricted_field_markers:
         if marker in flat:
             return Decision("tool", "blocked", policy.name, reason="restricted_field_request", tool=name,
                             detail=f"argument names restricted field '{marker}'")
 
-    if policy.screen_tool_arguments and name != "send_email":
+    if policy.screen_tool_arguments and name not in {"send_email", "analyze_crm_data"}:
         for value in _string_args(args):
             hit = classify_text(value, policy, skip={"prompt_injection"})
             if hit:

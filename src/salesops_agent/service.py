@@ -99,7 +99,8 @@ def ask(question: str, settings: Settings | None = None, model: Any = None) -> R
         return result(answer=policy.input_refusal, status="blocked", blocked=decision.blocked_payload())
 
     # 2. Agent loop with the tool guardrail in front of every tool.
-    check_ctx = ToolCheckContext(policy=policy, index=index, specs=specs, known_recipients=ctx.crm.known_emails())
+    check_ctx = ToolCheckContext(policy=policy, index=index, specs=specs,
+                                 known_recipients=ctx.crm.known_emails(), sandbox=ctx.sandbox)
     agent = build_agent(
         model or make_chat_model(settings),
         build_tools(specs, ctx),

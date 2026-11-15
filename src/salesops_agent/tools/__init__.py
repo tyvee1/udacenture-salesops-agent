@@ -19,10 +19,11 @@ from langchain_core.tools import StructuredTool
 from salesops_agent.config import ConfigError, Settings
 from salesops_agent.data import CRMData, RestrictedData
 from salesops_agent.schemas import ARG_SCHEMAS
-from salesops_agent.tools import crm, email, internal
+from salesops_agent.sandbox import SandboxConfig
+from salesops_agent.tools import analysis, crm, email, internal
 from salesops_agent.tools.email import EmailOutbox
 
-_MODULES = {"crm": crm, "email": email, "internal": internal}
+_MODULES = {"analysis": analysis, "crm": crm, "email": email, "internal": internal}
 
 
 @dataclass
@@ -32,6 +33,7 @@ class ToolContext:
     crm: CRMData
     restricted: RestrictedData
     outbox: EmailOutbox
+    sandbox: SandboxConfig | None = None
 
 
 @dataclass(frozen=True)
@@ -83,6 +85,7 @@ def build_context(settings: Settings) -> ToolContext:
         crm=CRMData.load(data_dir),
         restricted=RestrictedData.load(data_dir),
         outbox=EmailOutbox(settings.path("state_dir") / "email_outbox.jsonl"),
+        sandbox=SandboxConfig.load(settings.root / "config" / "sandbox.yaml"),
     )
 
 

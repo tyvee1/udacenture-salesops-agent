@@ -1,0 +1,142 @@
+# Sandboxed analysis tool (analyze_crm_data) — enforced limits, versioned.
+#
+# Code submitted by the model is (1) parsed and checked against these allowlists
+# before anything runs, then (2) executed in a separate Python process started in
+# isolated mode with an empty environment, CPU/memory/file-size limits and a
+# wall-clock timeout. Only the datasets listed here are passed in.
+
+sandbox_version: 1
+
+limits:
+  timeout_seconds: 5          # wall clock, enforced by the parent process
+  cpu_seconds: 5              # RLIMIT_CPU in the child
+  memory_mb: 512              # RLIMIT_AS in the child (Linux; macOS does not enforce it)
+  max_code_chars: 4000
+  max_output_chars: 20000
+
+# Approved CRM datasets made available as variables. Restricted HR and financial
+# data are never loaded into the sandbox.
+datasets:
+  - accounts
+  - opportunities
+  - activities
+  - support_tickets
+  - product_usage
+  - contacts
+
+# Fields removed from a dataset before it enters the sandbox (personal data the
+# analysis does not need).
+exclude_fields:
+  contacts: [email]
+
+# The only builtins the code can call.
+allowed_builtins:
+  - abs
+  - all
+  - any
+  - bool
+  - dict
+  - enumerate
+  - filter
+  - float
+  - int
+  - len
+  - list
+  - map
+  - max
+  - min
+  - range
+  - reversed
+  - round
+  - set
+  - sorted
+  - str
+  - sum
+  - tuple
+  - zip
+  - isinstance
+
+# The only attribute (method) names the code can use, for list/dict/str values.
+allowed_attributes:
+  - append
+  - count
+  - endswith
+  - extend
+  - get
+  - index
+  - items
+  - join
+  - keys
+  - lower
+  - replace
+  - setdefault
+  - sort
+  - split
+  - startswith
+  - strip
+  - title
+  - update
+  - upper
+  - values
+
+# Python syntax node types the code may contain. Anything else (import, def,
+# class, with, try, lambda-free decorators, global, del, await, yield…) is refused.
+allowed_nodes:
+  - Module
+  - Expr
+  - Assign
+  - AugAssign
+  - For
+  - If
+  - Break
+  - Continue
+  - Pass
+  - Compare
+  - BoolOp
+  - BinOp
+  - UnaryOp
+  - IfExp
+  - Call
+  - keyword
+  - Name
+  - Load
+  - Store
+  - Constant
+  - List
+  - Tuple
+  - Dict
+  - Set
+  - ListComp
+  - DictComp
+  - SetComp
+  - GeneratorExp
+  - comprehension
+  - Subscript
+  - Slice
+  - Attribute
+  - Lambda
+  - arguments
+  - arg
+  - JoinedStr
+  - FormattedValue
+  - And
+  - Or
+  - Not
+  - USub
+  - UAdd
+  - Add
+  - Sub
+  - Mult
+  - Div
+  - FloorDiv
+  - Mod
+  - Eq
+  - NotEq
+  - Lt
+  - LtE
+  - Gt
+  - GtE
+  - In
+  - NotIn
+  - Is
+  - IsNot
