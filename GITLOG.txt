@@ -1,4 +1,4 @@
-* f5907f5 (HEAD -> main) Add run evidence: logs, traces, evaluation and monitoring reports
+* a454624 (HEAD -> main) Add run evidence: logs, traces, evaluation and monitoring reports
 * 6f979cf Say what the Langfuse flush actually confirms
 * 402ca44 Tell the model how to fix a refused analysis, not just that it failed
 * 3a52fd7 Add a Langfuse trace screenshot for the external observability integration
