@@ -1,0 +1,217 @@
+{
+  "run_id": "850b496c5be2",
+  "timestamp": "2026-11-15T19:39:54+00:00",
+  "input": "Draft and send a follow-up email to Acme Corp about next steps.",
+  "context": {
+    "task_id": null,
+    "user_id": "anonymous",
+    "session_id": "s-2e90b46f",
+    "thread_id": "t-850b496c5be2",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "versions": {
+    "package_version": "0.1.0",
+    "git_commit": "444ac29",
+    "prompt_id": "salesops_system",
+    "prompt_version": 6,
+    "prompt_sha256": "5cf38f9a5859043b6761651ef1af501c5767f0f8eae0da56415f3a2108aa5ff1",
+    "agent_config_sha256": "67eb14304cfc526a9506c5508374c06303d7a5544da173ee63f4e80deafb8b3a",
+    "tool_registry_sha256": "9f4afad19331f0329a767839b42670dacbee6e1a77d584edba6036ab691da128",
+    "policy_sha256": "8b579852311ba7e5a4bc6981b0d22ce59d4fbebf318b4a75fac2152af726d44f",
+    "uv_lock_sha256": "11b051af81cead4b56148cb65d3d417b20e21629677aeb8317b7391a55f4da5a",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "status": "rejected",
+  "selected_tools": [
+    "draft_email",
+    "send_email"
+  ],
+  "tool_calls": [
+    {
+      "tool": "draft_email",
+      "args": {
+        "account_name_or_id": "Acme Corp",
+        "purpose": "next steps"
+      },
+      "status": "executed",
+      "output": {
+        "status": "drafted",
+        "account_id": "A001",
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      }
+    },
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      },
+      "status": "rejected",
+      "output": {
+        "status": "rejected",
+        "reason": "human_rejected",
+        "policy": "human_approval_gate",
+        "tool": "send_email",
+        "detail": "A human reviewer rejected this action. It was not performed."
+      }
+    }
+  ],
+  "guardrail_decisions": [
+    {
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "draft_email"
+    },
+    {
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "send_email"
+    },
+    {
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    }
+  ],
+  "hitl": {
+    "approval_requested": true,
+    "decision": "reject",
+    "requests": [
+      {
+        "call_id": "call_jfeLUGAQskHZx7xm2IcBxqMM",
+        "tool": "send_email",
+        "args": {
+          "to": "omar.stone@acmecorp.example.com",
+          "subject": "Following up on Acme Corp",
+          "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+        },
+        "requested": true,
+        "decision": "reject",
+        "source": "cli_flag"
+      }
+    ]
+  },
+  "model_output": "The follow-up email to Acme Corp was drafted but not sent, as it was rejected by a human reviewer. If you would like to make any changes or try sending it again, please let me know!",
+  "final_output": "The follow-up email to Acme Corp was drafted but not sent, as it was rejected by a human reviewer. If you would like to make any changes or try sending it again, please let me know!",
+  "blocked": null,
+  "errors": [],
+  "failure_reason": null,
+  "latency_ms": 5512.0,
+  "usage": {
+    "input_tokens": 5835,
+    "output_tokens": 131,
+    "estimated_cost_usd": 0.00095385,
+    "usage_is_estimate": false
+  },
+  "timeline": [
+    {
+      "t_ms": 19.0,
+      "kind": "run_started",
+      "input_chars": 63,
+      "thread_key": "anonymous::s-2e90b46f::t-850b496c5be2"
+    },
+    {
+      "t_ms": 19.1,
+      "kind": "guardrail",
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 182.8,
+      "kind": "memory_loaded",
+      "prior_messages": 0
+    },
+    {
+      "t_ms": 1622.5,
+      "kind": "guardrail",
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "draft_email"
+    },
+    {
+      "t_ms": 1623.5,
+      "kind": "tool",
+      "tool": "draft_email",
+      "args": {
+        "account_name_or_id": "Acme Corp",
+        "purpose": "next steps"
+      },
+      "status": "executed",
+      "output": {
+        "status": "drafted",
+        "account_id": "A001",
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      }
+    },
+    {
+      "t_ms": 3663.0,
+      "kind": "guardrail",
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "send_email"
+    },
+    {
+      "t_ms": 3663.0,
+      "kind": "approval_requested",
+      "call_id": "call_jfeLUGAQskHZx7xm2IcBxqMM",
+      "tool": "send_email",
+      "args": {
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      }
+    },
+    {
+      "t_ms": 3666.0,
+      "kind": "approval_decided",
+      "call_id": "call_jfeLUGAQskHZx7xm2IcBxqMM",
+      "decision": "reject",
+      "source": "cli_flag"
+    },
+    {
+      "t_ms": 3666.0,
+      "kind": "tool",
+      "tool": "send_email",
+      "args": {
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      },
+      "status": "rejected",
+      "output": {
+        "status": "rejected",
+        "reason": "human_rejected",
+        "policy": "human_approval_gate",
+        "tool": "send_email",
+        "detail": "A human reviewer rejected this action. It was not performed."
+      }
+    },
+    {
+      "t_ms": 5512.0,
+      "kind": "guardrail",
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 5512.1,
+      "kind": "run_finished",
+      "status": "rejected"
+    }
+  ]
+}

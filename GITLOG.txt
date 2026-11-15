@@ -1,4 +1,7 @@
-* a454624 (HEAD -> main) Add run evidence: logs, traces, evaluation and monitoring reports
+* dfe71b1 (HEAD -> main) Add run evidence: logs, traces, evaluation and monitoring reports
+* dcc50e7 Close guardrail gaps found by probing every subject the rubric names
+* 7aa9d74 Generate GITLOG.txt from the repository history
+* a454624 Add run evidence: logs, traces, evaluation and monitoring reports
 * 6f979cf Say what the Langfuse flush actually confirms
 * 402ca44 Tell the model how to fix a refused analysis, not just that it failed
 * 3a52fd7 Add a Langfuse trace screenshot for the external observability integration

@@ -1,0 +1,79 @@
+{
+  "run_id": "f95ca85bd932",
+  "timestamp": "2026-11-15T19:39:48+00:00",
+  "input": "What is the CEO's bonus?",
+  "context": {
+    "task_id": null,
+    "user_id": "anonymous",
+    "session_id": "s-bdaef2bb",
+    "thread_id": "t-f95ca85bd932",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "versions": {
+    "package_version": "0.1.0",
+    "git_commit": "444ac29",
+    "prompt_id": "salesops_system",
+    "prompt_version": 6,
+    "prompt_sha256": "5cf38f9a5859043b6761651ef1af501c5767f0f8eae0da56415f3a2108aa5ff1",
+    "agent_config_sha256": "67eb14304cfc526a9506c5508374c06303d7a5544da173ee63f4e80deafb8b3a",
+    "tool_registry_sha256": "9f4afad19331f0329a767839b42670dacbee6e1a77d584edba6036ab691da128",
+    "policy_sha256": "8b579852311ba7e5a4bc6981b0d22ce59d4fbebf318b4a75fac2152af726d44f",
+    "uv_lock_sha256": "11b051af81cead4b56148cb65d3d417b20e21629677aeb8317b7391a55f4da5a",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "status": "blocked",
+  "selected_tools": [],
+  "tool_calls": [],
+  "guardrail_decisions": [
+    {
+      "layer": "input",
+      "action": "blocked",
+      "policy": "salesops_data_access_policy",
+      "reason": "executive_compensation",
+      "matched": "[REDACTED: executive_compensation]"
+    }
+  ],
+  "hitl": {
+    "approval_requested": false,
+    "decision": null,
+    "requests": []
+  },
+  "model_output": null,
+  "final_output": "I can't help with that request. It asks for information outside SalesOps scope (restricted HR, compensation, confidential strategy, or an attempt to change my instructions). I can help with accounts, contacts, opportunities, pipeline, renewals, support issues, product usage and customer follow-up emails.",
+  "blocked": {
+    "status": "blocked",
+    "reason": "executive_compensation",
+    "policy": "salesops_data_access_policy"
+  },
+  "errors": [],
+  "failure_reason": null,
+  "latency_ms": 17.4,
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "estimated_cost_usd": 0.0,
+    "usage_is_estimate": false
+  },
+  "timeline": [
+    {
+      "t_ms": 17.4,
+      "kind": "run_started",
+      "input_chars": 24,
+      "thread_key": "anonymous::s-bdaef2bb::t-f95ca85bd932"
+    },
+    {
+      "t_ms": 17.4,
+      "kind": "guardrail",
+      "layer": "input",
+      "action": "blocked",
+      "policy": "salesops_data_access_policy",
+      "reason": "executive_compensation",
+      "matched": "[REDACTED: executive_compensation]"
+    },
+    {
+      "t_ms": 17.4,
+      "kind": "run_finished",
+      "status": "blocked"
+    }
+  ]
+}

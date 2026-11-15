@@ -1,10 +1,10 @@
 {
-  "generated": "2026-11-15 19:04 UTC",
+  "generated": "2026-11-15 19:41 UTC",
   "total_runs": 38,
   "malformed_lines_skipped": 0,
   "window": {
-    "first": "2026-11-15T19:01:55+00:00",
-    "last": "2026-11-15T19:04:08+00:00"
+    "first": "2026-11-15T19:39:26+00:00",
+    "last": "2026-11-15T19:41:32+00:00"
   },
   "success_count": 38,
   "failure_count": 0,
@@ -16,14 +16,14 @@
     "rejected": 4
   },
   "latency_ms": {
-    "average": 3321.5,
-    "median": 1953.7,
-    "p95": 10216.2,
-    "max": 12969.0
+    "average": 3155.8,
+    "median": 1841.8,
+    "p95": 9426.2,
+    "max": 11930.4
   },
   "estimated_cost_usd": {
-    "total": 0.0198837,
-    "average_per_run": 0.00052326,
+    "total": 0.0198927,
+    "average_per_run": 0.00052349,
     "runs_with_estimated_usage": 12
   },
   "tool_call_counts": {

@@ -1,0 +1,209 @@
+{
+  "run_id": "8e36cd918a2a",
+  "timestamp": "2026-11-15T19:40:57+00:00",
+  "input": "Summarize the current sales pipeline by stage.",
+  "context": {
+    "task_id": "pipeline-by-stage",
+    "user_id": "anonymous",
+    "session_id": "s-3863fd88",
+    "thread_id": "t-8e36cd918a2a",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "versions": {
+    "package_version": "0.1.0",
+    "git_commit": "444ac29",
+    "prompt_id": "salesops_system",
+    "prompt_version": 6,
+    "prompt_sha256": "5cf38f9a5859043b6761651ef1af501c5767f0f8eae0da56415f3a2108aa5ff1",
+    "agent_config_sha256": "67eb14304cfc526a9506c5508374c06303d7a5544da173ee63f4e80deafb8b3a",
+    "tool_registry_sha256": "9f4afad19331f0329a767839b42670dacbee6e1a77d584edba6036ab691da128",
+    "policy_sha256": "8b579852311ba7e5a4bc6981b0d22ce59d4fbebf318b4a75fac2152af726d44f",
+    "uv_lock_sha256": "11b051af81cead4b56148cb65d3d417b20e21629677aeb8317b7391a55f4da5a",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "status": "completed",
+  "selected_tools": [
+    "summarize_pipeline"
+  ],
+  "tool_calls": [
+    {
+      "tool": "summarize_pipeline",
+      "args": {},
+      "status": "executed",
+      "output": {
+        "by_stage": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          },
+          "Discovery": {
+            "count": 28,
+            "amount_usd": 5725000
+          },
+          "Negotiation": {
+            "count": 23,
+            "amount_usd": 4750000
+          },
+          "Proposal": {
+            "count": 22,
+            "amount_usd": 3655000
+          },
+          "Qualification": {
+            "count": 25,
+            "amount_usd": 5005000
+          },
+          "Stalled": {
+            "count": 35,
+            "amount_usd": 7390000
+          }
+        },
+        "open_pipeline": {
+          "count": 133,
+          "amount_usd": 26525000
+        },
+        "closed": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          }
+        }
+      }
+    }
+  ],
+  "guardrail_decisions": [
+    {
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "summarize_pipeline"
+    },
+    {
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    }
+  ],
+  "hitl": {
+    "approval_requested": false,
+    "decision": null,
+    "requests": []
+  },
+  "model_output": "Here is the current sales pipeline summarized by stage:\n\n- **Closed Won**: \n  - Count: 27 \n  - Amount: $11,800,000\n\n- **Closed Lost**: \n  - Count: 22 \n  - Amount: $2,775,000\n\n- **Discovery**: \n  - Count: 28 \n  - Amount: $5,725,000\n\n- **Qualification**: \n  - Count: 25 \n  - Amount: $5,005,000\n\n- **Proposal**: \n  - Count: 22 \n  - Amount: $3,655,000\n\n- **Negotiation**: \n  - Count: 23 \n  - Amount: $4,750,000\n\n- **Stalled**: \n  - Count: 35 \n  - Amount: $7,390,000\n\n### Open Pipeline:\n- Total Count: 133 \n- Total Amount: $26,525,000\n\n### Closed Opportunities:\n- Total Closed Lost: 22 \n- Total Closed Won: 27 \n\nIf you need further details or analysis, feel free to ask!",
+  "final_output": "Here is the current sales pipeline summarized by stage:\n\n- **Closed Won**: \n  - Count: 27 \n  - Amount: $11,800,000\n\n- **Closed Lost**: \n  - Count: 22 \n  - Amount: $2,775,000\n\n- **Discovery**: \n  - Count: 28 \n  - Amount: $5,725,000\n\n- **Qualification**: \n  - Count: 25 \n  - Amount: $5,005,000\n\n- **Proposal**: \n  - Count: 22 \n  - Amount: $3,655,000\n\n- **Negotiation**: \n  - Count: 23 \n  - Amount: $4,750,000\n\n- **Stalled**: \n  - Count: 35 \n  - Amount: $7,390,000\n\n### Open Pipeline:\n- Total Count: 133 \n- Total Amount: $26,525,000\n\n### Closed Opportunities:\n- Total Closed Lost: 22 \n- Total Closed Won: 27 \n\nIf you need further details or analysis, feel free to ask!",
+  "blocked": null,
+  "errors": [],
+  "failure_reason": null,
+  "latency_ms": 5767.9,
+  "usage": {
+    "input_tokens": 3885,
+    "output_tokens": 250,
+    "estimated_cost_usd": 0.00073275,
+    "usage_is_estimate": false
+  },
+  "timeline": [
+    {
+      "t_ms": 20.2,
+      "kind": "run_started",
+      "input_chars": 46,
+      "thread_key": "anonymous::s-3863fd88::t-8e36cd918a2a"
+    },
+    {
+      "t_ms": 20.3,
+      "kind": "guardrail",
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 22.7,
+      "kind": "memory_loaded",
+      "prior_messages": 0
+    },
+    {
+      "t_ms": 1197.5,
+      "kind": "guardrail",
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "summarize_pipeline"
+    },
+    {
+      "t_ms": 1198.2,
+      "kind": "tool",
+      "tool": "summarize_pipeline",
+      "args": {},
+      "status": "executed",
+      "output": {
+        "by_stage": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          },
+          "Discovery": {
+            "count": 28,
+            "amount_usd": 5725000
+          },
+          "Negotiation": {
+            "count": 23,
+            "amount_usd": 4750000
+          },
+          "Proposal": {
+            "count": 22,
+            "amount_usd": 3655000
+          },
+          "Qualification": {
+            "count": 25,
+            "amount_usd": 5005000
+          },
+          "Stalled": {
+            "count": 35,
+            "amount_usd": 7390000
+          }
+        },
+        "open_pipeline": {
+          "count": 133,
+          "amount_usd": 26525000
+        },
+        "closed": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          }
+        }
+      }
+    },
+    {
+      "t_ms": 5767.9,
+      "kind": "guardrail",
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 5768.0,
+      "kind": "run_finished",
+      "status": "completed"
+    }
+  ]
+}
