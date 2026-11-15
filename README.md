@@ -325,7 +325,9 @@ or financial data, which is never loaded into it.
 3. *Controlled input and output.* Only the approved datasets are serialized into the process, with
    contact emails projected out; output is a single JSON object. An empty result (`[]` or `{}`) comes back with a `note`
    telling the model to check its filter values before reporting that nothing matches; a count of 0 is
-   a real answer and carries no note.
+   a real answer and carries no note. A refused submission says why: a syntax error quotes the
+   offending line, and code that joins a `for` or `if` block to other statements with `;` gets the
+   one-statement-per-line rule with an example.
 
 > **About the `exec(` in `sandbox_worker.py`.** A search for `exec(` finds one call, in the child
 > process. That call *is* the restricted execution: it runs only code that has already passed static

@@ -77,7 +77,7 @@ tools:
     description: Internal financial data and strategy. Restricted; retained from the prototype.
 
   - name: analyze_crm_data
-    version: 3
+    version: 4
     implementation: analysis.analyze_crm_data
     data_access: approved_crm
     risk: medium
@@ -102,3 +102,5 @@ tools:
       is low, medium, high or critical; ticket status is open, in_progress or resolved; activity sentiment
       and usage_trend are negative/neutral/positive and down/flat/up; relationship_status is champion,
       engaged, neutral or unresponsive. An empty result comes back with a note to check the filter.
+      Write one statement per line with real line breaks and 4-space indentation inside for/if
+      blocks; never join statements with ';'.

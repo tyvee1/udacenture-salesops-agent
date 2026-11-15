@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -79,6 +80,41 @@ class SandboxConfig:
         )
 
 
+#: A block statement joined to other code on one line: ``x = 1; for ...`` or ``for ...: if ...:``.
+_JOINED_BLOCK = re.compile(r";\s*(for|if|elif|else|while|with|try)\b|:\s*(for|if|while|with|try)\b[^\n]*:")
+
+ONE_STATEMENT_PER_LINE = (
+    "Python does not allow a for/if/while block after ';' or on the same line as another block. "
+    "Put each statement on its own line, using real line breaks, and indent the body of each "
+    "block by 4 spaces. For example:\n"
+    "counts = {}\n"
+    "for t in support_tickets:\n"
+    "    if t['status'] != 'resolved':\n"
+    "        counts[t['severity']] = counts.get(t['severity'], 0) + 1\n"
+    "result = counts"
+)
+
+
+def syntax_error_detail(code: str, exc: SyntaxError) -> str:
+    """A refusal message the model can act on, not just "invalid syntax (line 1)".
+
+    Why: in a live run the model wrote its analysis on one line, joining a ``for``
+    loop and an ``if`` with semicolons. The bare message told it nothing, so it
+    resubmitted the same shape twice and then abandoned the tool it was asked to
+    use. The message now quotes the offending line and, for that common mistake,
+    says exactly how to fix it.
+    """
+    line = (exc.text or "").strip()
+    if len(line) > 160:
+        line = line[:157] + "..."
+    detail = f"syntax error: {exc.msg} (line {exc.lineno})"
+    if line:
+        detail += f": {line}"
+    if _JOINED_BLOCK.search(code):
+        detail += "\n" + ONE_STATEMENT_PER_LINE
+    return detail
+
+
 def validate_code(code: str, cfg: SandboxConfig) -> None:
     """Raise :class:`SandboxViolation` unless ``code`` uses only allowed syntax, names and attributes.
 
@@ -94,7 +130,7 @@ def validate_code(code: str, cfg: SandboxConfig) -> None:
     try:
         tree = ast.parse(code, mode="exec")
     except SyntaxError as exc:
-        raise SandboxViolation(f"syntax error: {exc.msg} (line {exc.lineno})") from exc
+        raise SandboxViolation(syntax_error_detail(code, exc)) from exc
 
     assigned: set[str] = set()
     for node in ast.walk(tree):

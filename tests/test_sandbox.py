@@ -158,3 +158,57 @@ def test_exponent_operator_is_refused() -> None:
     """`**` is off the allowlist: 10**10**10 is a one-line denial of service."""
     with pytest.raises(SandboxViolation, match="Pow"):
         validate_code("result = 10**10**10", CFG)
+
+
+# ------------------------------------------------------------------ actionable refusals
+
+#: The exact code a live run submitted three times before abandoning the tool.
+JOINED_ON_ONE_LINE = (
+    "result = {'Discovery': 0, 'Qualification': 0, 'Proposal': 0, 'Negotiation': 0, 'Stalled': 0, 'total': 0}; "
+    "for opportunity in opportunities: if opportunity['stage'] in result: "
+    "result[opportunity['stage']] += opportunity['amount_usd']; result['total'] += opportunity['amount_usd'];"
+)
+
+
+def test_a_block_joined_with_semicolons_gets_an_actionable_message() -> None:
+    from salesops_agent.sandbox import ONE_STATEMENT_PER_LINE
+
+    with pytest.raises(SandboxViolation) as caught:
+        validate_code(JOINED_ON_ONE_LINE, CFG)
+    message = str(caught.value)
+    assert message.startswith("syntax error: invalid syntax (line 1): result = {")
+    assert ONE_STATEMENT_PER_LINE in message
+
+
+def test_the_suggested_fix_runs_and_answers_correctly() -> None:
+    """The example in the message must itself pass validation and give the right answer."""
+    from salesops_agent.sandbox import ONE_STATEMENT_PER_LINE
+
+    example = ONE_STATEMENT_PER_LINE.split("For example:\n", 1)[1]
+    out = run_analysis(example, CRM, CFG)
+    expected: dict[str, int] = {}
+    for t in CRM.support_tickets:
+        if t["status"] != "resolved":
+            expected[t["severity"]] = expected.get(t["severity"], 0) + 1
+    assert out["status"] == "ok" and out["result"] == expected
+
+
+def test_other_syntax_errors_quote_the_line_without_the_joined_block_hint() -> None:
+    """Negative control: the hint is for the one-line block mistake only."""
+    from salesops_agent.sandbox import ONE_STATEMENT_PER_LINE
+
+    with pytest.raises(SandboxViolation) as caught:
+        validate_code("totals = (1 +\nresult = totals", CFG)
+    assert "syntax error" in str(caught.value) and ONE_STATEMENT_PER_LINE not in str(caught.value)
+
+
+def test_the_same_analysis_written_one_statement_per_line_passes() -> None:
+    code = (
+        "result = {'Discovery': 0, 'Qualification': 0, 'Proposal': 0, 'Negotiation': 0, 'Stalled': 0, 'total': 0}\n"
+        "for opportunity in opportunities:\n"
+        "    if opportunity['stage'] in result:\n"
+        "        result[opportunity['stage']] += opportunity['amount_usd']\n"
+        "        result['total'] += opportunity['amount_usd']\n"
+    )
+    out = run_analysis(code, CRM, CFG)
+    assert out["status"] == "ok" and out["result"]["total"] == 26_525_000
