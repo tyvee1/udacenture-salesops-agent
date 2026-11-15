@@ -77,7 +77,7 @@ tools:
     description: Internal financial data and strategy. Restricted; retained from the prototype.
 
   - name: analyze_crm_data
-    version: 2
+    version: 3
     implementation: analysis.analyze_crm_data
     data_access: approved_crm
     risk: medium
@@ -94,4 +94,11 @@ tools:
       summary, sentiment); support_tickets (ticket_id, account_id, created_at, severity, status, category,
       summary); product_usage (usage_id, account_id, period, active_users, monthly_logins, usage_trend,
       feature_adoption_score); contacts (contact_id, account_id, first_name, last_name, title,
-      is_primary, relationship_status). Dates are ISO strings (YYYY-MM-DD).
+      is_primary, relationship_status). Dates are ISO strings (YYYY-MM-DD). Values are lower-case and
+      exact: account_status is customer, former_customer, prospect or qualified_lead; health_score,
+      contract_start and contract_end are null for prospects and qualified leads, so test for None
+      before comparing; opportunity stage is Discovery, Qualification, Proposal, Negotiation, Stalled,
+      Closed Won or Closed Lost; opportunity type is new_business, expansion or renewal; ticket severity
+      is low, medium, high or critical; ticket status is open, in_progress or resolved; activity sentiment
+      and usage_trend are negative/neutral/positive and down/flat/up; relationship_status is champion,
+      engaged, neutral or unresponsive. An empty result comes back with a note to check the filter.

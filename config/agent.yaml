@@ -11,7 +11,7 @@ agent:
   # Which prompt file to load: prompts/<id>/v<version>.md
   prompt:
     id: salesops_system
-    version: 5
+    version: 6
   # Upper bound on model/tool steps in one run; stops runaway tool loops.
   recursion_limit: 25
 

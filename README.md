@@ -237,7 +237,7 @@ every run's log line and trace (`versions`):
 
 | Component | File(s) | Version marker |
 | --- | --- | --- |
-| System prompt | `prompts/salesops_system/v1.md` … `v5.md` | front matter `version`, `status`, change notes; active version set in `config/agent.yaml` |
+| System prompt | `prompts/salesops_system/v1.md` … `v6.md` | front matter `version`, `status`, change notes; active version set in `config/agent.yaml` |
 | Agent and model configuration | `config/agent.yaml` | `config_version`; provider, model, temperature, timeout, retries, pricing |
 | Tool definitions | `config/tools.yaml` | `registry_version`; per-tool `version`, `risk`, `data_access` |
 | Tool argument schemas | `src/salesops_agent/schemas.py` | Pydantic models validated before any tool runs |
@@ -250,7 +250,9 @@ every run's log line and trace (`versions`):
 The prompt history is kept, not overwritten: v1 is the notebook prompt verbatim; v2 removes the
 invitation to use internal tools; v3 routes calculations to the sandbox; v4 states the email approval
 rule; v5 honours a request for a named tool, after a live evaluation run showed v4 answering "using the
-analysis tool" with a different tool. The active prompt is v5. Each run records `prompt_version`, `prompt_sha256`, `agent_config_sha256`,
+analysis tool" with a different tool; v6 treats an empty analysis result as a filter to check, after a
+v5 run filtered on `'Customer'` instead of `'customer'` and reported that no accounts matched. The active
+prompt is v6. Each run records `prompt_version`, `prompt_sha256`, `agent_config_sha256`,
 `tool_registry_sha256`, `policy_sha256`, `uv_lock_sha256`, the model and the git commit — so two runs
 that behaved differently can be compared field by field
 (`uv run salesops-agent replay <run_id>` does this; see [replay](#state-memory-isolation-and-replay)).
@@ -321,7 +323,9 @@ or financial data, which is never loaded into it.
    (`RLIMIT_FSIZE=0`) limits, a wall-clock timeout of 5 seconds, a 4,000-character code limit and a
    20,000-character result limit.
 3. *Controlled input and output.* Only the approved datasets are serialized into the process, with
-   contact emails projected out; output is a single JSON object.
+   contact emails projected out; output is a single JSON object. An empty result (`[]` or `{}`) comes back with a `note`
+   telling the model to check its filter values before reporting that nothing matches; a count of 0 is
+   a real answer and carries no note.
 
 > **About the `exec(` in `sandbox_worker.py`.** A search for `exec(` finds one call, in the child
 > process. That call *is* the restricted execution: it runs only code that has already passed static

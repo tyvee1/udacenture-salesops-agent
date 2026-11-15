@@ -103,3 +103,27 @@ def test_schema_rejects_out_of_bounds_limit(ctx: ToolContext) -> None:
     tools = {t.name: t for t in build_tools(load_registry(settings.path("tool_registry")), ctx)}
     with pytest.raises(Exception):
         tools["list_open_opportunities"].invoke({"limit": 10_000})
+
+
+# ------------------------------------------------------------------ empty sandbox results
+
+
+def test_empty_sandbox_result_carries_a_note() -> None:
+    """A filter on a guessed value ('Customer' for 'customer') must not read as 'there are none'."""
+    from salesops_agent.tools.analysis import EMPTY_RESULT_NOTE, flag_empty_result
+
+    for empty in ([], {}, ()):
+        assert flag_empty_result({"status": "ok", "result": empty})["note"] == EMPTY_RESULT_NOTE
+
+
+def test_real_answers_and_errors_carry_no_note() -> None:
+    """Negative controls: zero, False, a non-empty list and an error pass through unchanged."""
+    from salesops_agent.tools.analysis import flag_empty_result
+
+    for outcome in (
+        {"status": "ok", "result": 0},
+        {"status": "ok", "result": False},
+        {"status": "ok", "result": [["GlobalRetail Ltd", 25, "2026-06-15"]]},
+        {"status": "error", "error": "TypeError"},
+    ):
+        assert flag_empty_result(outcome) == outcome
