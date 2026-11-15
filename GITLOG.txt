@@ -1,0 +1,18 @@
+* 73dc5a0 (HEAD -> main) Add run evidence: logs, traces, evaluation and monitoring reports
+* 61d5be3 Check an empty analysis result before reporting it (prompt v6)
+* 5cc8d51 Send a request that names the analysis tool to that tool (prompt v5)
+* bb6b323 Keep guardrail reason codes readable in logs and traces
+* 4e0700c Give the project overview its own README heading
+* 99d40c0 Document the system, its controls and its limitations
+* fbd77b1 Add Dockerfile packaging and a GitHub Actions evaluation workflow
+* ba580d9 Add a Streamlit interface with an approval screen
+* e5f466c Add SQLite state, per-user memory isolation, replayable history and Langfuse tracing
+* ec558f4 Add structured run logs, trace artifacts and the monitoring report
+* 4e1b2aa Add the human-in-the-loop approval gate for high-risk actions
+* 2be5d62 Add the sandboxed analysis tool for approved CRM data
+* 8ea02c2 Add input, tool/action and output guardrails enforced in code
+* 0fe9547 Add the evaluation suite with regression and cost reporting
+* 6f5edf1 Refactor the notebook tools into a registry and add the CLI entry point
+* f371def Extract the system prompt and agent configuration into versioned files
+* 37eda28 Scaffold the uv project structure
+* 5423f0d Import the SalesOps prototype notebook and mock CRM data
