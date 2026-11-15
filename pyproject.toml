@@ -21,6 +21,7 @@ observability = ["langfuse>=3.0"]
 salesops-agent = "salesops_agent.cli:main"
 evaluate = "salesops_agent.evaluation.runner:main"
 generate-monitoring-report = "salesops_agent.monitoring:main"
+salesops-ui = "salesops_agent.ui:launch"
 
 [dependency-groups]
 dev = ["pytest>=8.0", "jsonschema>=4.0"]
