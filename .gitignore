@@ -18,3 +18,6 @@ dist/
 .idea/
 .vscode/
 .ipynb_checkpoints/
+
+# Runtime state: SQLite store and the simulated email outbox
+state/

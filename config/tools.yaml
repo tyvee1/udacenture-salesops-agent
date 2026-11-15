@@ -1,0 +1,77 @@
+# Tool registry — the agent's entire tool surface, versioned.
+#
+# The agent can only call tools listed here. Each entry names its implementation,
+# the data it touches and its risk level. The guardrail policy (config/policy.yaml)
+# reads `data_access` and `risk`, so access rules follow the tool's declared nature
+# rather than a list of names typed somewhere in code.
+#
+# data_access values:
+#   approved_crm           accounts, contacts, opportunities, activities, tickets, usage
+#   restricted_hr          internal HR records (compensation, performance, terminations)
+#   restricted_financial   internal financial strategy (M&A, layoffs, pricing policy)
+#   outbound_customer      sends something to a customer
+
+registry_version: 1
+
+tools:
+  - name: lookup_account
+    version: 1
+    implementation: crm.lookup_account
+    data_access: approved_crm
+    risk: low
+    description: Look up one B2B account by account ID (e.g. A003) or by name (e.g. "TechStart Inc").
+
+  - name: lookup_account_context
+    version: 1
+    implementation: crm.lookup_account_context
+    data_access: approved_crm
+    risk: low
+    description: >-
+      Return one account with its contacts, opportunities, recent activities, support tickets and product
+      usage. Use this for account risk and renewal questions.
+
+  - name: list_open_opportunities
+    version: 1
+    implementation: crm.list_open_opportunities
+    data_access: approved_crm
+    risk: low
+    description: >-
+      List open opportunities (not Closed Won or Closed Lost), optionally filtered by stage, as compact rows
+      with the account name. Returns at most `limit` rows plus the total count.
+
+  - name: summarize_pipeline
+    version: 1
+    implementation: crm.summarize_pipeline
+    data_access: approved_crm
+    risk: low
+    description: Summarize opportunity count and value by stage, with open and closed totals reported separately.
+
+  - name: draft_email
+    version: 1
+    implementation: email.draft_email
+    data_access: approved_crm
+    risk: low
+    description: >-
+      Draft (but do not send) a follow-up email to an account's primary contact. Returns the recipient,
+      subject and body.
+
+  - name: send_email
+    version: 1
+    implementation: email.send_email
+    data_access: outbound_customer
+    risk: high
+    description: Send a customer-facing email to a CRM contact. High-risk action.
+
+  - name: lookup_internal_hr_data
+    version: 1
+    implementation: internal.lookup_internal_hr_data
+    data_access: restricted_hr
+    risk: high
+    description: Internal HR records. Restricted; retained from the prototype.
+
+  - name: lookup_internal_financial_data
+    version: 1
+    implementation: internal.lookup_internal_financial_data
+    data_access: restricted_financial
+    risk: high
+    description: Internal financial data and strategy. Restricted; retained from the prototype.
