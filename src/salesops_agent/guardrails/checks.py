@@ -89,6 +89,8 @@ def _near(spans_a: list[tuple[int, int]], spans_b: list[tuple[int, int]], window
 
 def _anchors(text: str, kind: str, index: SensitiveIndex) -> list[tuple[int, int]]:
     spans = index.people_in(text)
+    if kind == "people_or_title":
+        spans += [(m.start(), m.end()) for m in EXEC_TITLES.finditer(text)]
     if kind == "people_or_money":
         spans += [(m.start(), m.end()) for m in EXEC_TITLES.finditer(text)]
         spans += [(m.start(), m.end()) for m in MONEY.finditer(text)]

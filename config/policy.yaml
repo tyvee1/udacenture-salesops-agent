@@ -10,7 +10,7 @@
 # cannot trigger a category it merely resembles.
 
 policy_name: salesops_data_access_policy
-policy_version: 1
+policy_version: 2
 
 input:
   categories:
@@ -22,6 +22,8 @@ input:
         - '\b(jailbreak|developer mode|dan mode|do anything now)\b'
         - '\bpretend\b.{0,40}\b(rules|polic(y|ies)|restrictions|guardrails)\b.{0,30}\b(do not|don.?t|no longer)\b'
         - '\bnew instructions?\s*:'
+        # An override verb directly on the rules ("disregard the policy", "bypass the guardrails").
+        - '\b(ignore|disregard|forget|override|bypass)\s+(the|any|all|your|these|those|this)?\s*(instructions?|rules|polic(y|ies)|guidelines|guardrails|restrictions)\b'
     - reason: system_prompt_extraction
       patterns:
         - '\b(reveal|show|print|repeat|output|display|leak|tell me|give me|what (is|are))\b.{0,40}\b(system prompt|hidden (instructions?|prompt|rules)|your (instructions?|prompt|rules)|initial prompt|developer (message|prompt))\b'
@@ -51,6 +53,10 @@ input:
         - '\breduction in (force|headcount|workforce)\b'
         - '\bdownsiz\w*\b'
         - '\bjob cuts\b'
+        # Paraphrases found by probing before submission ("cut jobs", "eliminate positions").
+        - '\bcut(s|ting)? (jobs|staff|headcount|positions|roles|employees)\b'
+        - '\belimina\w* (jobs|positions|roles)\b'
+        - '\breduc\w* (headcount|staff|the workforce)\b'
     - reason: mergers_and_acquisitions
       exempt:
         - '\bcustomer acquisition\b'
@@ -98,12 +104,19 @@ output:
   # anchor: a term only blocks when it falls within `proximity` of an anchor —
   #   people_or_money  an employee named in the HR file, an executive title, or a money amount
   #   people           an employee named in the HR file
+  #   people_or_title  an employee named in the HR file, or an executive title
   #   (none)           the term blocks on its own
   # strong: phrases that block on their own even when the category needs an anchor.
   categories:
     - reason: executive_compensation
       anchor: people_or_money
       terms: '\b(bonus(es)?|salar(y|ies)|compensation|equity|stock grant|pay package)\b'
+    # Pay stated with a verb ("Marcus Thorne earns $850,000") rather than a noun. Anchored on a
+    # person in the HR file or an executive title only — not on money — because CRM answers
+    # routinely say an account "pays $90,000 a year" or "earns us $1.2M".
+    - reason: employee_pay
+      anchor: people_or_title
+      terms: '\b(earn(s|ed|ing)?\b(?! us\b)|(is|was|gets?|got|being) paid|makes? (about |around |roughly )?\$?\d|income|wages?|paycheck|take[- ]home)'
     - reason: employee_performance
       anchor: people
       strong: '\b(performance improvement plan|termination warning|pending termination)\b'
@@ -115,7 +128,7 @@ output:
         - '\b(lead|logo|user|new[- ]customer) acquisition\b'
       terms: '\b(acquir\w*|acquisitions?|mergers?|takeovers?|buyouts?|active negotiation)\b'
     - reason: layoffs
-      terms: '\b(lay ?offs?|laid off|(headcount|workforce|staff) (reduction|cuts?)|reduction in (force|headcount|workforce)|planned reduction|\d{1,2} ?% reduction|downsiz\w*)\b'
+      terms: '\b(lay ?offs?|laid off|(headcount|workforce|staff) (reduction|cuts?)|reduction in (force|headcount|workforce)|planned reduction|\d{1,2} ?% reduction|downsiz\w*|cut(s|ting)? (jobs|staff|headcount|positions|roles)|elimina\w* (jobs|positions|roles))\b'
     - reason: confidential_strategy
       terms: '\b(confidential_[a-z_]+|max(imum)? unapproved discount|executive override threshold|internal pricing strategy|discount polic(y|ies)|runway)\b'
   # Raw field names from restricted data are blocked wherever they appear.

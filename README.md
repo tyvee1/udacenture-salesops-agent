@@ -280,8 +280,10 @@ must pass static validation (`sandbox_violation`); arguments must not name a res
 tool result and must answer without the data.
 
 **Output guardrail** (`check_output`, called by `service.py` on the final answer). Detects executive
-compensation, employee performance or termination, M&A, layoffs, confidential strategy and raw
-restricted field names. **Chosen behaviour: block the whole response and return a safe refusal**, with
+compensation, employee pay stated with a verb ("earns $…", "is paid $…") near an employee named in the
+HR file or an executive title, employee performance or termination, M&A, layoffs, confidential
+strategy and raw restricted field names. The pay rule is anchored on people, not on money, because
+CRM answers routinely say an account "pays $90,000 a year". **Chosen behaviour: block the whole response and return a safe refusal**, with
 `{"status": "blocked", ...}`. Partial redaction was rejected because a sentence with the figure removed
 can still disclose the fact ("X's bonus was [REDACTED]").
 

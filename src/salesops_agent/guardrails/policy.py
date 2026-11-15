@@ -113,7 +113,7 @@ def load_policy(path: Path) -> Policy:
         for c in out["categories"]
     ]
     for c in output_categories:
-        if c.anchor not in (None, "people", "people_or_money"):
+        if c.anchor not in (None, "people", "people_or_title", "people_or_money"):
             raise ConfigError(f"policy.yaml output.{c.reason}: unknown anchor {c.anchor!r}")
     return Policy(
         name=raw["policy_name"],
