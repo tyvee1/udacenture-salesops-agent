@@ -1,7 +1,7 @@
 # Monitoring Report
 
-Generated 2026-11-15 17:43 UTC by `uv run generate-monitoring-report` from `logs/runs.jsonl`.
-Window: 2026-11-15T17:41:00+00:00 to 2026-11-15T17:43:10+00:00.
+Generated 2026-11-15 19:04 UTC by `uv run generate-monitoring-report` from `logs/runs.jsonl`.
+Window: 2026-11-15T19:01:55+00:00 to 2026-11-15T19:04:08+00:00.
 
 ## Summary
 
@@ -10,10 +10,10 @@ Window: 2026-11-15T17:41:00+00:00 to 2026-11-15T17:43:10+00:00.
 | Total runs | 38 |
 | Success rate | 100.0% |
 | Failure rate | 0.0% |
-| Average latency (ms) | 3217.2 |
-| Median / p95 / max latency (ms) | 2010.1 / 10341.6 / 12371.0 |
-| Estimated total cost (USD) | 0.019790 |
-| Estimated average cost per run (USD) | 0.000521 |
+| Average latency (ms) | 3321.5 |
+| Median / p95 / max latency (ms) | 1953.7 / 10216.2 / 12969.0 |
+| Estimated total cost (USD) | 0.019884 |
+| Estimated average cost per run (USD) | 0.000523 |
 | Tool calls | 31 |
 | Guardrail blocks | 13 |
 | HITL approvals | 2 |
@@ -109,5 +109,5 @@ Success means the run ended as designed (completed, blocked by a guardrail, or r
 - **Reliability.** 38 of 38 runs ended as designed (100.0%); 0 ended in an error (0.0%). No run failed, so the failure-reason table is empty by design.
 - **Guardrails.** 13 blocks across 13 runs; the tool layer blocked most (6). A rising block rate on ordinary traffic suggests a false positive; a block on the tool or output layer means an earlier layer let something through.
 - **Human approval.** 6 approval requests: 2 approved, 4 rejected, of which 1 were rejected automatically because no approval signal was given.
-- **Latency.** Median 2010.1 ms, p95 10341.6 ms. Runs stopped by the input guardrail never call the model, so they pull the average down; compare p95 between reports rather than the mean.
-- **Cost.** Estimated $0.019790 in total, $0.000521 per run. 12 runs used a scripted model whose token counts are estimated from text length, so treat those costs as indicative.
+- **Latency.** Median 1953.7 ms, p95 10216.2 ms. Runs stopped by the input guardrail never call the model, so they pull the average down; compare p95 between reports rather than the mean.
+- **Cost.** Estimated $0.019884 in total, $0.000523 per run. 12 runs used a scripted model whose token counts are estimated from text length, so treat those costs as indicative.

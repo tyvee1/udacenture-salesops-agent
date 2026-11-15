@@ -1,0 +1,88 @@
+{
+  "run_id": "62107ed653cb",
+  "timestamp": "2026-11-15T19:03:04+00:00",
+  "input": "Which account did I say was my focus?",
+  "context": {
+    "task_id": null,
+    "user_id": "demo-alice",
+    "session_id": "s-2e5770c8",
+    "thread_id": "t-62107ed653cb",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "versions": {
+    "package_version": "0.1.0",
+    "git_commit": "ac7e119",
+    "prompt_id": "salesops_system",
+    "prompt_version": 6,
+    "prompt_sha256": "5cf38f9a5859043b6761651ef1af501c5767f0f8eae0da56415f3a2108aa5ff1",
+    "agent_config_sha256": "67eb14304cfc526a9506c5508374c06303d7a5544da173ee63f4e80deafb8b3a",
+    "tool_registry_sha256": "9f4afad19331f0329a767839b42670dacbee6e1a77d584edba6036ab691da128",
+    "policy_sha256": "c264b5b9280598d7ed94eb2e9c9c4d2c915e262181c632bd3e979fbc1493c8df",
+    "uv_lock_sha256": "11b051af81cead4b56148cb65d3d417b20e21629677aeb8317b7391a55f4da5a",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "status": "completed",
+  "selected_tools": [],
+  "tool_calls": [],
+  "guardrail_decisions": [
+    {
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    }
+  ],
+  "hitl": {
+    "approval_requested": false,
+    "decision": null,
+    "requests": []
+  },
+  "model_output": "I'm unable to access previous conversations or any specific details about your focus accounts. Please provide the account name or ID, and I'll assist you with any information you need.",
+  "final_output": "I'm unable to access previous conversations or any specific details about your focus accounts. Please provide the account name or ID, and I'll assist you with any information you need.",
+  "blocked": null,
+  "errors": [],
+  "failure_reason": null,
+  "latency_ms": 1891.8,
+  "usage": {
+    "input_tokens": 1828,
+    "output_tokens": 34,
+    "estimated_cost_usd": 0.0002946,
+    "usage_is_estimate": false
+  },
+  "timeline": [
+    {
+      "t_ms": 18.6,
+      "kind": "run_started",
+      "input_chars": 37,
+      "thread_key": "demo-alice::s-2e5770c8::t-62107ed653cb"
+    },
+    {
+      "t_ms": 18.7,
+      "kind": "guardrail",
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 198.7,
+      "kind": "memory_loaded",
+      "prior_messages": 0
+    },
+    {
+      "t_ms": 1891.8,
+      "kind": "guardrail",
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 1891.8,
+      "kind": "run_finished",
+      "status": "completed"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "run_id": "d1c0e3362e3d",
+  "timestamp": "2026-11-15T19:03:00+00:00",
+  "input": "Which account did I say was my focus?",
+  "context": {
+    "task_id": null,
+    "user_id": "bob",
+    "session_id": "s1",
+    "thread_id": "t1",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "versions": {
+    "package_version": "0.1.0",
+    "git_commit": "ac7e119",
+    "prompt_id": "salesops_system",
+    "prompt_version": 6,
+    "prompt_sha256": "5cf38f9a5859043b6761651ef1af501c5767f0f8eae0da56415f3a2108aa5ff1",
+    "agent_config_sha256": "67eb14304cfc526a9506c5508374c06303d7a5544da173ee63f4e80deafb8b3a",
+    "tool_registry_sha256": "9f4afad19331f0329a767839b42670dacbee6e1a77d584edba6036ab691da128",
+    "policy_sha256": "c264b5b9280598d7ed94eb2e9c9c4d2c915e262181c632bd3e979fbc1493c8df",
+    "uv_lock_sha256": "11b051af81cead4b56148cb65d3d417b20e21629677aeb8317b7391a55f4da5a",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "status": "completed",
+  "selected_tools": [],
+  "tool_calls": [],
+  "guardrail_decisions": [
+    {
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    }
+  ],
+  "hitl": {
+    "approval_requested": false,
+    "decision": null,
+    "requests": []
+  },
+  "model_output": "I'm unable to access personal notes or previous conversations. Please provide the name or ID of the account you're referring to, and I can assist you with information about it.",
+  "final_output": "I'm unable to access personal notes or previous conversations. Please provide the name or ID of the account you're referring to, and I can assist you with information about it.",
+  "blocked": null,
+  "errors": [],
+  "failure_reason": null,
+  "latency_ms": 2015.5,
+  "usage": {
+    "input_tokens": 1828,
+    "output_tokens": 34,
+    "estimated_cost_usd": 0.0002946,
+    "usage_is_estimate": false
+  },
+  "timeline": [
+    {
+      "t_ms": 16.9,
+      "kind": "run_started",
+      "input_chars": 37,
+      "thread_key": "bob::s1::t1"
+    },
+    {
+      "t_ms": 17.0,
+      "kind": "guardrail",
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 177.6,
+      "kind": "memory_loaded",
+      "prior_messages": 0
+    },
+    {
+      "t_ms": 2015.5,
+      "kind": "guardrail",
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 2015.5,
+      "kind": "run_finished",
+      "status": "completed"
+    }
+  ]
+}
