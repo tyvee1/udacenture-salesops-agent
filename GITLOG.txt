@@ -1,19 +1,19 @@
-* dfe71b1 (HEAD -> main) Add run evidence: logs, traces, evaluation and monitoring reports
-* dcc50e7 Close guardrail gaps found by probing every subject the rubric names
-* 7aa9d74 Generate GITLOG.txt from the repository history
-* a454624 Add run evidence: logs, traces, evaluation and monitoring reports
-* 6f979cf Say what the Langfuse flush actually confirms
-* 402ca44 Tell the model how to fix a refused analysis, not just that it failed
-* 3a52fd7 Add a Langfuse trace screenshot for the external observability integration
-* 4ca0cec Accept LANGFUSE_BASE_URL and explain a missing Langfuse host
-* a6a24d9 Make each run one well-formed Langfuse trace, guardrails included
-* af83d6a Generate GITLOG.txt from the repository history
-* 73dc5a0 Add run evidence: logs, traces, evaluation and monitoring reports
-* 61d5be3 Check an empty analysis result before reporting it (prompt v6)
-* 5cc8d51 Send a request that names the analysis tool to that tool (prompt v5)
-* bb6b323 Keep guardrail reason codes readable in logs and traces
-* 4e0700c Give the project overview its own README heading
-* 99d40c0 Document the system, its controls and its limitations
+* 729555d (HEAD -> main) Add run evidence: logs, traces, evaluation and monitoring reports
+* 15dcfa3 Close guardrail gaps found by probing every subject the rubric names
+* 0a6e2f2 Generate GITLOG.txt from the repository history
+* ac94e50 Add run evidence: logs, traces, evaluation and monitoring reports
+* ea2bc7a Say what the Langfuse flush actually confirms
+* 479783e Tell the model how to fix a refused analysis, not just that it failed
+* fe7f53c Add a Langfuse trace screenshot for the external observability integration
+* ae0759d Accept LANGFUSE_BASE_URL and explain a missing Langfuse host
+* 5119842 Make each run one well-formed Langfuse trace, guardrails included
+* 75ce8f2 Generate GITLOG.txt from the repository history
+* 213ed12 Add run evidence: logs, traces, evaluation and monitoring reports
+* 2337947 Check an empty analysis result before reporting it (prompt v6)
+* 825f068 Send a request that names the analysis tool to that tool (prompt v5)
+* 84ea9f1 Keep guardrail reason codes readable in logs and traces
+* 2ed4e3d Give the project overview its own README heading
+* 34eb694 Document the system, its controls and its limitations
 * fbd77b1 Add Dockerfile packaging and a GitHub Actions evaluation workflow
 * ba580d9 Add a Streamlit interface with an approval screen
 * e5f466c Add SQLite state, per-user memory isolation, replayable history and Langfuse tracing
