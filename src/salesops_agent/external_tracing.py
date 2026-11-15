@@ -324,6 +324,7 @@ class LangfuseSession:
 
     tracer: LangfuseTracer
     client: Any
+    client_host: str = ""
 
     @property
     def callbacks(self) -> list[Any]:
@@ -363,4 +364,4 @@ def langfuse_session(settings: Settings, **client_kwargs: Any) -> LangfuseSessio
     environment = os.environ.get("LANGFUSE_TRACING_ENVIRONMENT") or "development"
     client = Langfuse(public_key=public, secret_key=secret, host=host, mask=make_mask(redactor, frozenset({system_prompt})),
                       environment=environment, release=git_commit(settings.root) or "unversioned", **client_kwargs)
-    return LangfuseSession(tracer=LangfuseTracer(client=client, public_key=public), client=client)
+    return LangfuseSession(tracer=LangfuseTracer(client=client, public_key=public), client=client, client_host=host)

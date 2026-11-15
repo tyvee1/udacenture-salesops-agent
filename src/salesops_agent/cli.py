@@ -95,7 +95,11 @@ def cmd_ask(args: argparse.Namespace) -> int:
                  tracer=session.tracer if session else None)
     if session:
         session.flush()
-        print("[langfuse] run sent (redacted) — open your Langfuse project to view the trace", file=sys.stderr)
+        # flush() returns once the client has finished trying; it does not report whether the
+        # server accepted the spans. Say only what is known, and where to confirm delivery.
+        print(f"[langfuse] trace for run {result.run_id} flushed to {session.client_host} (redacted). "
+              "Confirm it under Tracing > Traces; a 'Failed to export spans' line above means it did not arrive.",
+              file=sys.stderr)
     return _print_result(result)
 
 
