@@ -1,0 +1,225 @@
+{
+  "run_id": "9b3a2e6cb3d3",
+  "timestamp": "2026-11-15T17:43:00+00:00",
+  "input": "Draft and send a follow-up email to Acme Corp about next steps.",
+  "context": {
+    "task_id": "email-approved",
+    "user_id": "anonymous",
+    "session_id": "s-e3d123cc",
+    "thread_id": "t-9b3a2e6cb3d3",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "versions": {
+    "package_version": "0.1.0",
+    "git_commit": "61d5be3",
+    "prompt_id": "salesops_system",
+    "prompt_version": 6,
+    "prompt_sha256": "5cf38f9a5859043b6761651ef1af501c5767f0f8eae0da56415f3a2108aa5ff1",
+    "agent_config_sha256": "67eb14304cfc526a9506c5508374c06303d7a5544da173ee63f4e80deafb8b3a",
+    "tool_registry_sha256": "f789b58015f32e5b760289d373ac1cc595246fb88cd3d102ed54fbf5bc682cd0",
+    "policy_sha256": "c264b5b9280598d7ed94eb2e9c9c4d2c915e262181c632bd3e979fbc1493c8df",
+    "uv_lock_sha256": "f7a4b7f593f912311043042c16fad71c9c08b75bbed3467779c78e8682e7f0b6",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "status": "completed",
+  "selected_tools": [
+    "draft_email",
+    "send_email"
+  ],
+  "tool_calls": [
+    {
+      "tool": "draft_email",
+      "args": {
+        "account_name_or_id": "Acme Corp",
+        "purpose": "next steps"
+      },
+      "status": "executed",
+      "output": {
+        "status": "drafted",
+        "account_id": "A001",
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      }
+    },
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      },
+      "status": "executed",
+      "output": {
+        "status": "sent",
+        "message": {
+          "to": "omar.stone@acmecorp.example.com",
+          "subject": "Following up on Acme Corp",
+          "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n",
+          "status": "sent",
+          "sent_at": "2026-11-15T17:43:03.323822+00:00",
+          "approval_source": "cli_flag"
+        }
+      }
+    }
+  ],
+  "guardrail_decisions": [
+    {
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "draft_email"
+    },
+    {
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "send_email"
+    },
+    {
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    }
+  ],
+  "hitl": {
+    "approval_requested": true,
+    "decision": "approve",
+    "requests": [
+      {
+        "call_id": "call_n1QhSHruapY688fAgCxNKZcn",
+        "tool": "send_email",
+        "args": {
+          "to": "omar.stone@acmecorp.example.com",
+          "subject": "Following up on Acme Corp",
+          "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+        },
+        "requested": true,
+        "decision": "approve",
+        "source": "cli_flag"
+      }
+    ]
+  },
+  "model_output": "The follow-up email to Omar at Acme Corp has been successfully sent regarding the next steps.",
+  "final_output": "The follow-up email to Omar at Acme Corp has been successfully sent regarding the next steps.",
+  "blocked": null,
+  "errors": [],
+  "failure_reason": null,
+  "latency_ms": 4793.0,
+  "usage": {
+    "input_tokens": 5816,
+    "output_tokens": 108,
+    "estimated_cost_usd": 0.0009372,
+    "usage_is_estimate": false
+  },
+  "timeline": [
+    {
+      "t_ms": 16.0,
+      "kind": "run_started",
+      "input_chars": 63,
+      "thread_key": "anonymous::s-e3d123cc::t-9b3a2e6cb3d3"
+    },
+    {
+      "t_ms": 16.1,
+      "kind": "guardrail",
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 18.6,
+      "kind": "memory_loaded",
+      "prior_messages": 0
+    },
+    {
+      "t_ms": 1345.9,
+      "kind": "guardrail",
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "draft_email"
+    },
+    {
+      "t_ms": 1347.2,
+      "kind": "tool",
+      "tool": "draft_email",
+      "args": {
+        "account_name_or_id": "Acme Corp",
+        "purpose": "next steps"
+      },
+      "status": "executed",
+      "output": {
+        "status": "drafted",
+        "account_id": "A001",
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      }
+    },
+    {
+      "t_ms": 3257.6,
+      "kind": "guardrail",
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "send_email"
+    },
+    {
+      "t_ms": 3257.6,
+      "kind": "approval_requested",
+      "call_id": "call_n1QhSHruapY688fAgCxNKZcn",
+      "tool": "send_email",
+      "args": {
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      }
+    },
+    {
+      "t_ms": 3260.4,
+      "kind": "approval_decided",
+      "call_id": "call_n1QhSHruapY688fAgCxNKZcn",
+      "decision": "approve",
+      "source": "cli_flag"
+    },
+    {
+      "t_ms": 3261.5,
+      "kind": "tool",
+      "tool": "send_email",
+      "args": {
+        "to": "omar.stone@acmecorp.example.com",
+        "subject": "Following up on Acme Corp",
+        "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n"
+      },
+      "status": "executed",
+      "output": {
+        "status": "sent",
+        "message": {
+          "to": "omar.stone@acmecorp.example.com",
+          "subject": "Following up on Acme Corp",
+          "body": "Hi Omar,\n\nI wanted to follow up regarding next steps.\n\nBest regards,\nThe UdaCenture Sales Team\n",
+          "status": "sent",
+          "sent_at": "2026-11-15T17:43:03.323822+00:00",
+          "approval_source": "cli_flag"
+        }
+      }
+    },
+    {
+      "t_ms": 4792.9,
+      "kind": "guardrail",
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 4793.0,
+      "kind": "run_finished",
+      "status": "completed"
+    }
+  ]
+}

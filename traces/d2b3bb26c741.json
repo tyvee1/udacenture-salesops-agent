@@ -1,0 +1,209 @@
+{
+  "run_id": "d2b3bb26c741",
+  "timestamp": "2026-11-15T17:42:36+00:00",
+  "input": "Summarize the current sales pipeline by stage.",
+  "context": {
+    "task_id": "pipeline-by-stage",
+    "user_id": "anonymous",
+    "session_id": "s-25e91d0d",
+    "thread_id": "t-d2b3bb26c741",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "versions": {
+    "package_version": "0.1.0",
+    "git_commit": "61d5be3",
+    "prompt_id": "salesops_system",
+    "prompt_version": 6,
+    "prompt_sha256": "5cf38f9a5859043b6761651ef1af501c5767f0f8eae0da56415f3a2108aa5ff1",
+    "agent_config_sha256": "67eb14304cfc526a9506c5508374c06303d7a5544da173ee63f4e80deafb8b3a",
+    "tool_registry_sha256": "f789b58015f32e5b760289d373ac1cc595246fb88cd3d102ed54fbf5bc682cd0",
+    "policy_sha256": "c264b5b9280598d7ed94eb2e9c9c4d2c915e262181c632bd3e979fbc1493c8df",
+    "uv_lock_sha256": "f7a4b7f593f912311043042c16fad71c9c08b75bbed3467779c78e8682e7f0b6",
+    "model": "vocareum:gpt-4o-mini"
+  },
+  "status": "completed",
+  "selected_tools": [
+    "summarize_pipeline"
+  ],
+  "tool_calls": [
+    {
+      "tool": "summarize_pipeline",
+      "args": {},
+      "status": "executed",
+      "output": {
+        "by_stage": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          },
+          "Discovery": {
+            "count": 28,
+            "amount_usd": 5725000
+          },
+          "Negotiation": {
+            "count": 23,
+            "amount_usd": 4750000
+          },
+          "Proposal": {
+            "count": 22,
+            "amount_usd": 3655000
+          },
+          "Qualification": {
+            "count": 25,
+            "amount_usd": 5005000
+          },
+          "Stalled": {
+            "count": 35,
+            "amount_usd": 7390000
+          }
+        },
+        "open_pipeline": {
+          "count": 133,
+          "amount_usd": 26525000
+        },
+        "closed": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          }
+        }
+      }
+    }
+  ],
+  "guardrail_decisions": [
+    {
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "summarize_pipeline"
+    },
+    {
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    }
+  ],
+  "hitl": {
+    "approval_requested": false,
+    "decision": null,
+    "requests": []
+  },
+  "model_output": "Here's the current sales pipeline summarized by stage:\n\n- **Closed Won**: 27 opportunities, totaling $11,800,000\n- **Closed Lost**: 22 opportunities, totaling $2,775,000\n- **Discovery**: 28 opportunities, totaling $5,725,000\n- **Qualification**: 25 opportunities, totaling $5,005,000\n- **Proposal**: 22 opportunities, totaling $3,655,000\n- **Negotiation**: 23 opportunities, totaling $4,750,000\n- **Stalled**: 35 opportunities, totaling $7,390,000\n\n**Total Open Pipeline**: 133 opportunities, totaling $26,525,000.",
+  "final_output": "Here's the current sales pipeline summarized by stage:\n\n- **Closed Won**: 27 opportunities, totaling $11,800,000\n- **Closed Lost**: 22 opportunities, totaling $2,775,000\n- **Discovery**: 28 opportunities, totaling $5,725,000\n- **Qualification**: 25 opportunities, totaling $5,005,000\n- **Proposal**: 22 opportunities, totaling $3,655,000\n- **Negotiation**: 23 opportunities, totaling $4,750,000\n- **Stalled**: 35 opportunities, totaling $7,390,000\n\n**Total Open Pipeline**: 133 opportunities, totaling $26,525,000.",
+  "blocked": null,
+  "errors": [],
+  "failure_reason": null,
+  "latency_ms": 4451.7,
+  "usage": {
+    "input_tokens": 3833,
+    "output_tokens": 163,
+    "estimated_cost_usd": 0.00067275,
+    "usage_is_estimate": false
+  },
+  "timeline": [
+    {
+      "t_ms": 18.6,
+      "kind": "run_started",
+      "input_chars": 46,
+      "thread_key": "anonymous::s-25e91d0d::t-d2b3bb26c741"
+    },
+    {
+      "t_ms": 18.7,
+      "kind": "guardrail",
+      "layer": "input",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 21.6,
+      "kind": "memory_loaded",
+      "prior_messages": 0
+    },
+    {
+      "t_ms": 1354.8,
+      "kind": "guardrail",
+      "layer": "tool",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy",
+      "tool": "summarize_pipeline"
+    },
+    {
+      "t_ms": 1355.7,
+      "kind": "tool",
+      "tool": "summarize_pipeline",
+      "args": {},
+      "status": "executed",
+      "output": {
+        "by_stage": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          },
+          "Discovery": {
+            "count": 28,
+            "amount_usd": 5725000
+          },
+          "Negotiation": {
+            "count": 23,
+            "amount_usd": 4750000
+          },
+          "Proposal": {
+            "count": 22,
+            "amount_usd": 3655000
+          },
+          "Qualification": {
+            "count": 25,
+            "amount_usd": 5005000
+          },
+          "Stalled": {
+            "count": 35,
+            "amount_usd": 7390000
+          }
+        },
+        "open_pipeline": {
+          "count": 133,
+          "amount_usd": 26525000
+        },
+        "closed": {
+          "Closed Lost": {
+            "count": 22,
+            "amount_usd": 2775000
+          },
+          "Closed Won": {
+            "count": 27,
+            "amount_usd": 11800000
+          }
+        }
+      }
+    },
+    {
+      "t_ms": 4451.7,
+      "kind": "guardrail",
+      "layer": "output",
+      "action": "allowed",
+      "policy": "salesops_data_access_policy"
+    },
+    {
+      "t_ms": 4451.7,
+      "kind": "run_finished",
+      "status": "completed"
+    }
+  ]
+}

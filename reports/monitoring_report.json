@@ -1,0 +1,92 @@
+{
+  "generated": "2026-11-15 17:43 UTC",
+  "total_runs": 38,
+  "malformed_lines_skipped": 0,
+  "window": {
+    "first": "2026-11-15T17:41:00+00:00",
+    "last": "2026-11-15T17:43:10+00:00"
+  },
+  "success_count": 38,
+  "failure_count": 0,
+  "success_rate": 1.0,
+  "failure_rate": 0.0,
+  "status_counts": {
+    "blocked": 7,
+    "completed": 27,
+    "rejected": 4
+  },
+  "latency_ms": {
+    "average": 3217.2,
+    "median": 2010.1,
+    "p95": 10341.6,
+    "max": 12371.0
+  },
+  "estimated_cost_usd": {
+    "total": 0.0197898,
+    "average_per_run": 0.00052078,
+    "runs_with_estimated_usage": 12
+  },
+  "tool_call_counts": {
+    "lookup_account_context": 7,
+    "analyze_crm_data": 7,
+    "send_email": 7,
+    "draft_email": 5,
+    "lookup_account": 2,
+    "summarize_pipeline": 1,
+    "lookup_internal_financial_data": 1,
+    "lookup_internal_hr_data": 1
+  },
+  "tool_call_outcomes": {
+    "analyze_crm_data:blocked": 3,
+    "analyze_crm_data:executed": 4,
+    "draft_email:executed": 5,
+    "lookup_account:executed": 2,
+    "lookup_account_context:executed": 7,
+    "lookup_internal_financial_data:blocked": 1,
+    "lookup_internal_hr_data:blocked": 1,
+    "send_email:blocked": 1,
+    "send_email:executed": 2,
+    "send_email:rejected": 4,
+    "summarize_pipeline:executed": 1
+  },
+  "total_tool_calls": 31,
+  "guardrail_blocks": {
+    "total": 13,
+    "runs_with_a_block": 13,
+    "by_layer": {
+      "input": 5,
+      "output": 2,
+      "tool": 6
+    },
+    "by_reason": {
+      "tool:sandbox_violation": 3,
+      "input:executive_compensation": 2,
+      "tool:restricted_internal_data": 2,
+      "input:prompt_injection": 1,
+      "input:mergers_and_acquisitions": 1,
+      "input:confidential_strategy": 1,
+      "output:executive_compensation": 1,
+      "output:layoffs": 1,
+      "tool:unsafe_email_content": 1
+    }
+  },
+  "hitl": {
+    "approval_requests": 6,
+    "approvals": 2,
+    "rejections": 4,
+    "by_source": {
+      "cli_flag": 5,
+      "default_no_signal": 1
+    }
+  },
+  "common_failure_reasons": {},
+  "evaluation_runs": 24,
+  "prompt_versions_seen": {
+    "6": 38
+  },
+  "models_seen": {
+    "vocareum:gpt-4o-mini": 26,
+    "scripted (scripted)": 9,
+    "scripted (isolation-demo)": 3
+  }
+}
