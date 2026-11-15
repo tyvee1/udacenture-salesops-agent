@@ -23,8 +23,9 @@ class RunRecorder:
     events: list[dict[str, Any]] = field(default_factory=list)
     guardrail_events: list[dict[str, Any]] = field(default_factory=list)
     tool_events: list[dict[str, Any]] = field(default_factory=list)
-    hitl: dict[str, Any] | None = None
+    approvals: list[dict[str, Any]] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
+    _seen: set[tuple[str, ...]] = field(default_factory=set, repr=False)
 
     def _elapsed_ms(self) -> float:
         return round((time.perf_counter() - self.started) * 1000, 1)
@@ -33,8 +34,22 @@ class RunRecorder:
         """Append a timestamped event to the run's timeline."""
         self.events.append({"t_ms": self._elapsed_ms(), "kind": kind, **data})
 
-    def guardrail(self, decision: Any) -> None:
-        """Record a guardrail decision (allowed or blocked)."""
+    def _first_time(self, *key: str) -> bool:
+        """True the first time ``key`` is seen in this run.
+
+        Resuming after an approval pause re-runs the paused tool step from its
+        start, which would otherwise record its policy check and approval request
+        twice; keying on the tool call id keeps one record per call.
+        """
+        if key in self._seen:
+            return False
+        self._seen.add(key)
+        return True
+
+    def guardrail(self, decision: Any, call_id: str | None = None) -> None:
+        """Record a guardrail decision (allowed or blocked), once per tool call."""
+        if call_id and not self._first_time("guardrail", call_id):
+            return
         record = decision.to_dict()
         self.guardrail_events.append(record)
         self.event("guardrail", **record)
@@ -44,6 +59,31 @@ class RunRecorder:
         record = {"tool": name, "args": args, "status": status, "output": output}
         self.tool_events.append(record)
         self.event("tool", **record)
+
+    def approval_requested(self, call_id: str, tool: str, args: dict[str, Any]) -> None:
+        """Record that a high-risk action paused for human approval."""
+        if not self._first_time("approval_requested", call_id):
+            return
+        entry = {"call_id": call_id, "tool": tool, "args": args, "requested": True, "decision": None, "source": None}
+        self.approvals.append(entry)
+        self.event("approval_requested", call_id=call_id, tool=tool, args=args)
+
+    def approval_decided(self, call_id: str, decision: str, source: str) -> None:
+        """Record the human decision for a paused action."""
+        if not self._first_time("approval_decided", call_id):
+            return
+        for entry in self.approvals:
+            if entry["call_id"] == call_id:
+                entry.update(decision=decision, source=source)
+        self.event("approval_decided", call_id=call_id, decision=decision, source=source)
+
+    @property
+    def hitl_decision(self) -> str | None:
+        """Summary decision for the run: reject if any action was rejected, else approve, else None."""
+        decisions = [a["decision"] for a in self.approvals if a["decision"]]
+        if not decisions:
+            return None
+        return "reject" if "reject" in decisions else "approve"
 
     def error(self, message: str) -> None:
         """Record an error message."""

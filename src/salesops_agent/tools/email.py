@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from salesops_agent.approval import ApprovalRequired, consume
 from salesops_agent.data import AccountNotFound
 
 
@@ -22,14 +23,24 @@ class EmailOutbox:
     One JSON object per line. Appending a line is the closest a local file gets
     to an atomic send: a crash mid-write leaves at most one partial last line,
     never a corrupted array.
+
+    :meth:`deliver` refuses to write unless the caller holds a human approval
+    grant for this exact message (see :mod:`salesops_agent.approval`). The check
+    lives here, at the point of no return, so no other code path can send.
     """
 
     def __init__(self, path: Path):
         self.path = path
 
     def deliver(self, message: dict[str, Any]) -> dict[str, Any]:
-        """Record ``message`` as sent and return the stored record."""
-        record = {**message, "status": "sent", "sent_at": datetime.now(UTC).isoformat()}
+        """Record ``message`` as sent and return the stored record.
+
+        Raises :class:`~salesops_agent.approval.ApprovalRequired` when there is no
+        matching, unused approval grant for ``message``.
+        """
+        grant = consume("send_email", {k: message[k] for k in ("to", "subject", "body")})
+        record = {**message, "status": "sent", "sent_at": datetime.now(UTC).isoformat(),
+                  "approval_source": grant.source}
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record) + "\n")
@@ -66,6 +77,9 @@ def draft_email(ctx, account_name_or_id: str, purpose: str) -> dict[str, Any]:
 
 
 def send_email(ctx, to: str, subject: str, body: str) -> dict[str, Any]:
-    """Send an email by appending it to the outbox."""
-    record = ctx.outbox.deliver({"to": to, "subject": subject, "body": body})
+    """Send an email by appending it to the outbox — only with a matching approval grant."""
+    try:
+        record = ctx.outbox.deliver({"to": to, "subject": subject, "body": body})
+    except ApprovalRequired as exc:
+        return {"status": "blocked", "reason": "approval_required", "policy": "human_approval_gate", "detail": str(exc)}
     return {"status": "sent", "message": record}

@@ -7,7 +7,11 @@ path gets the same configuration, prompt, tools and runtime controls:
    agent; no model is even constructed, so no tokens are spent and no key is needed.
 2. **Agent loop** — the model proposes tool calls; the tool guardrail middleware
    checks each one before it runs.
-3. **Output guardrail** — screens the final answer before it is returned.
+3. **Approval gate** — when the agent pauses before a high-risk action, the
+   decision comes from ``approval`` (the ``--approval`` flag), else from an
+   interactive ``approver`` callback, else it is ``reject``: a run with nobody to
+   ask fails closed.
+4. **Output guardrail** — screens the final answer before it is returned.
 """
 
 from __future__ import annotations
@@ -15,9 +19,11 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
 from langchain_core.messages import AIMessage
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Command
 
 from salesops_agent.agent import build_agent
 from salesops_agent.config import Settings, load_settings, make_chat_model
@@ -42,12 +48,13 @@ class RunResult:
 
     run_id: str
     answer: str
-    status: str  # completed | blocked | error
+    status: str  # completed | blocked | rejected | error
     tools_called: list[str] = field(default_factory=list)
     tools_executed: list[str] = field(default_factory=list)
     guardrail_events: list[dict[str, Any]] = field(default_factory=list)
     blocked: dict[str, Any] | None = None
     hitl_decision: str | None = None
+    approvals: list[dict[str, Any]] = field(default_factory=list)
     latency_ms: float = 0.0
     input_tokens: int = 0
     output_tokens: int = 0
@@ -65,14 +72,37 @@ def _final_text(messages: list[Any]) -> str:
     return ""
 
 
-def ask(question: str, settings: Settings | None = None, model: Any = None) -> RunResult:
+#: Called with the pending action when the agent pauses; returns "approve" or "reject".
+Approver = Callable[[dict[str, Any]], str]
+
+
+def _decide(pending: dict[str, Any], approval: str | None, approver: Approver | None) -> dict[str, str]:
+    """Pick the decision for one paused action and say where it came from."""
+    if approval is not None:
+        return {"decision": approval, "source": "cli_flag"}
+    if approver is not None:
+        return {"decision": approver(pending), "source": "interactive"}
+    return {"decision": "reject", "source": "default_no_signal"}
+
+
+def ask(
+    question: str,
+    settings: Settings | None = None,
+    model: Any = None,
+    approval: str | None = None,
+    approver: Approver | None = None,
+) -> RunResult:
     """Answer one SalesOps question under the runtime controls.
 
     Args:
         question: the user's request.
         settings: loaded configuration (defaults to the project's agent.yaml).
         model: optional chat model override; the configured provider is used when omitted.
+        approval: ``"approve"`` or ``"reject"`` applied to every paused high-risk action.
+        approver: interactive callback used when ``approval`` is not given.
     """
+    if approval is not None and approval not in ("approve", "reject"):
+        raise ValueError("approval must be 'approve' or 'reject'")
     settings = settings or load_settings()
     rec = RunRecorder(run_id=uuid.uuid4().hex[:12])
     prompt = load_prompt(settings)
@@ -88,7 +118,7 @@ def ask(question: str, settings: Settings | None = None, model: Any = None) -> R
         executed = [t["tool"] for t in rec.tool_events if t["status"] == "executed"]
         return RunResult(
             run_id=rec.run_id, tools_executed=executed, tools_called=list(proposed),
-            guardrail_events=rec.guardrail_events,
+            guardrail_events=rec.guardrail_events, hitl_decision=rec.hitl_decision, approvals=rec.approvals,
             latency_ms=round((time.perf_counter() - rec.started) * 1000, 1), versions=versions, **kw,
         )
 
@@ -106,12 +136,16 @@ def ask(question: str, settings: Settings | None = None, model: Any = None) -> R
         build_tools(specs, ctx),
         prompt.text,
         middleware=[ToolGuardrailMiddleware(check_ctx, rec)],
+        checkpointer=InMemorySaver(),  # required to pause and resume at the approval gate
     )
+    config = {"configurable": {"thread_id": rec.run_id}, "recursion_limit": settings.recursion_limit}
     try:
-        state = agent.invoke(
-            {"messages": [{"role": "user", "content": question}]},
-            {"recursion_limit": settings.recursion_limit},
-        )
+        state = agent.invoke({"messages": [{"role": "user", "content": question}]}, config)
+        while state.get("__interrupt__"):
+            interrupts = state["__interrupt__"]
+            decisions = {i.id: _decide(i.value, approval, approver) for i in interrupts}
+            resume = next(iter(decisions.values())) if len(decisions) == 1 else decisions
+            state = agent.invoke(Command(resume=resume), config)
     except Exception as exc:  # model/provider/recursion failures become a recorded error, not a crash
         rec.error(f"{type(exc).__name__}: {exc}")
         return result(answer="The agent failed to complete this request.", status="error",
@@ -130,4 +164,5 @@ def ask(question: str, settings: Settings | None = None, model: Any = None) -> R
     rec.guardrail(out)
     if out.blocked:
         return result(answer=policy.output_refusal, status="blocked", blocked=out.blocked_payload(), **cost)
-    return result(answer=answer, status="completed", **cost)
+    status = "rejected" if rec.hitl_decision == "reject" else "completed"
+    return result(answer=answer, status=status, **cost)
