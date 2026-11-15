@@ -2,6 +2,8 @@
 
 **Author:** Ty
 
+## Overview
+
 The SalesOps prototype notebook, turned into a local production candidate: a reproducible `uv`
 project with versioned prompts, tools, schemas and configuration; a command-line entry point; an
 automated evaluation suite with cost reporting; input, tool/action and output guardrails enforced in
@@ -10,6 +12,7 @@ traces and an aggregated monitoring report. Optional additions: SQLite state wit
 isolation and replayable history, Langfuse tracing, a Streamlit interface with an approval screen,
 a Dockerfile and a GitHub Actions workflow.
 
+- [Overview](#overview)
 - [Prototype Review](#prototype-review)
 - [Setup](#setup)
 - [Run the agent](#run-the-agent)
@@ -602,7 +605,7 @@ The repository ships the output of real runs, so each artifact the rubric names 
 
 | Rubric item | Where to look | How to re-create it |
 | --- | --- | --- |
-| Structured run log | `logs/runs.jsonl` | any `uv run salesops-agent ask ...` |
+| Structured run log | `logs/runs.jsonl` | any of the `ask` commands above |
 | Per-run traces | `traces/<run_id>.json` | same |
 | Evaluation report | `reports/evaluation_report.md`, `.json` | `uv run evaluate` |
 | Monitoring report | `reports/monitoring_report.md`, `.json` | `uv run generate-monitoring-report` |
